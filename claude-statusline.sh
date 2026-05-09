@@ -117,17 +117,19 @@ case "$layout" in
     narrow)
         # 1. Model (short) + ✱
         out+="${MOD}${RESET} ${BOLD}${MOD}${model_short}${RESET}${think_mark}"
-        # 2. Context
+        # 2. Context bar + %
         out+="${sep}${CTX}${ctx_bar} ${ctx_int}%${RESET}"
-        # 3. 5h limit (if present) — no bar, no reset
+        # 3. 5h limit — bar + % (no reset, no ⏱ icon to save space)
         if [ -n "$rate5h_pct" ] && [ "$rate5h_pct" != "null" ]; then
             r=$(printf '%.0f' "$rate5h_pct" 2>/dev/null || echo 0)
-            out+="${sep}${LIM5}5h ${r}%${RESET}"
+            r_bar=$(mini_bar5 "$r")
+            out+="${sep}${LIM5}5h ${r_bar} ${r}%${RESET}"
         fi
-        # 4. 7d limit
+        # 4. 7d limit — bar + %
         if [ -n "$rate7d_pct" ] && [ "$rate7d_pct" != "null" ]; then
             r=$(printf '%.0f' "$rate7d_pct" 2>/dev/null || echo 0)
-            out+="${sep}${LIM7}7d ${r}%${RESET}"
+            r_bar=$(mini_bar5 "$r")
+            out+="${sep}${LIM7}7d ${r_bar} ${r}%${RESET}"
         fi
         ;;
 
@@ -136,18 +138,20 @@ case "$layout" in
         out+="${MOD}${RESET} ${BOLD}${MOD}${model_short}${RESET}${think_mark}"
         # 2. Context bar + %
         out+="${sep}${CTX}${ctx_bar} ${ctx_int}%${RESET}"
-        # 3. 5h limit % + reset (no inner bar)
+        # 3. 5h limit — bar + % + reset (D-style: bar always)
         if [ -n "$rate5h_pct" ] && [ "$rate5h_pct" != "null" ]; then
             r=$(printf '%.0f' "$rate5h_pct" 2>/dev/null || echo 0)
+            r_bar=$(mini_bar5 "$r")
             until_5h=$(fmt_until "$rate5h_at")
-            out+="${sep}${LIM5}⏱ 5h ${r}%${RESET}"
+            out+="${sep}${LIM5}⏱ 5h ${r_bar} ${r}%${RESET}"
             [ -n "$until_5h" ] && out+=" ${LIM5}${DIM}↻${until_5h}${RESET}"
         fi
-        # 4. 7d limit
+        # 4. 7d limit — bar + % + reset
         if [ -n "$rate7d_pct" ] && [ "$rate7d_pct" != "null" ]; then
             r=$(printf '%.0f' "$rate7d_pct" 2>/dev/null || echo 0)
+            r_bar=$(mini_bar5 "$r")
             until_7d=$(fmt_until "$rate7d_at")
-            out+="${sep}${LIM7} 7d ${r}%${RESET}"
+            out+="${sep}${LIM7} 7d ${r_bar} ${r}%${RESET}"
             [ -n "$until_7d" ] && out+=" ${LIM7}${DIM}↻${until_7d}${RESET}"
         fi
         # 5. Duration
