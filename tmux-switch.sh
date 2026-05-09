@@ -100,16 +100,27 @@ pick_theme() {
     current="$(current_theme)"
 
     local picked
+    # vim-style movement: j/k up-down, h cancel, l accept, gg/G to ends
     picked=$(list_themes | fzf \
         --prompt="Theme › " \
-        --header="Current: $current  •  ↑↓ select  •  Enter apply  •  Esc cancel" \
+        --header="Current: $current  •  hjkl / ↑↓ select  •  l or Enter apply  •  h or Esc cancel" \
         --height=40% \
         --layout=reverse \
         --border=rounded \
         --color="border:#cba6f7,prompt:#cba6f7,header:#9399b2,pointer:#cba6f7,info:#7f849c" \
         --query="" \
-        --bind="ctrl-/:change-preview-window(hidden|)" \
-        --no-sort) || return 0
+        --no-sort \
+        --disabled \
+        --bind="j:down" \
+        --bind="k:up" \
+        --bind="h:abort" \
+        --bind="l:accept" \
+        --bind="g:first" \
+        --bind="G:last" \
+        --bind="ctrl-d:half-page-down" \
+        --bind="ctrl-u:half-page-up" \
+        --bind="/:enable-search+show-input+clear-query" \
+        --bind="esc:abort") || return 0
 
     [[ -n "$picked" ]] || return 0
     local name
