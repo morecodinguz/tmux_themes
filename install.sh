@@ -47,6 +47,10 @@ declare -a PLUGINS=(
     "tmux-powerline     erikw/tmux-powerline"
     "tmux-gruvbox       egel/tmux-gruvbox"
     "tmux-nova          o0th/tmux-nova"
+    # Companion plugins required by catppuccin status modules:
+    "tmux-battery       tmux-plugins/tmux-battery"
+    "tmux-cpu           tmux-plugins/tmux-cpu"
+    "tmux-online-status tmux-plugins/tmux-online-status"
 )
 
 say "Cloning theme plugins into $PLUGINS_DIR"
