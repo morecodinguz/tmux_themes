@@ -1,17 +1,34 @@
 #!/usr/bin/env bash
-# Claude Code statusline — Claude-only info, fully colored.
-# Renders:    Opus 4.7 (1M)  ·  ▰▰▱▱▱ 43%  ·  ⏱ 5h ▰▰▰▰▱ 87% ↻25m  ·   7d ▰▰▰▰▱ 78% ↻5d  ·   2h 0m
+# Claude Code statusline — Claude-only info, width-adaptive.
 #
-# Each segment is rendered in its own theme accent color end-to-end (bar,
-# percentage, reset time) — no dim grays inside a segment. Theme colors come
-# from ~/.tmux-theme so the line retunes itself on tmux-switch.
+# Three layouts based on the pane width:
+#   FULL   (≥120 cols)   Opus 4.7 (1M context) ✱  ·  ▰▰▱▱▱ 43%  ·  ⏱ 5h ▰▰▰▰▱ 87% ↻25m  ·   7d ▰▰▰▰▱ 78% ↻5d  ·   12m
+#   MEDIUM ( 80–119)     Opus 4.7 ✱  ·  ▰▰▱▱▱ 43%  ·  ⏱ 5h 87% ↻25m  ·   7d 78% ↻5d  ·   12m
+#   NARROW (<80)         Opus 4.7  ·  ▰▰▱▱▱ 43%  ·  5h 87%  ·  7d 78%
+#
+# Colors come from ~/.tmux-theme so the line retunes itself on tmux-switch.
 
 input=$(cat)
+
+# ─── width detection ──────────────────────────────────────────────────────
+# Inside tmux the pane width is authoritative. Outside, fall back to COLUMNS
+# (set by the parent shell) or tput cols (rarely works in this subshell).
+cols=""
+if [[ -n "$TMUX" ]]; then
+    cols=$(tmux display-message -p '#{pane_width}' 2>/dev/null)
+fi
+[[ -z "$cols" ]] && cols="${COLUMNS:-}"
+[[ -z "$cols" ]] && cols=$(tput cols 2>/dev/null)
+[[ -z "$cols" ]] && cols=120
+
+if   [[ "$cols" -lt 80 ]];  then layout=narrow
+elif [[ "$cols" -lt 120 ]]; then layout=medium
+else                             layout=full
+fi
 
 # ─── Claude-only fields ───────────────────────────────────────────────────
 model=$(echo "$input"        | jq -r '.model.display_name // "Claude"')
 ctx_pct=$(echo "$input"      | jq -r '.context_window.used_percentage // 0')
-ctx_size=$(echo "$input"     | jq -r '.context_window.context_window_size // 0')
 duration_ms=$(echo "$input"  | jq -r '.cost.total_duration_ms // 0')
 thinking=$(echo "$input"     | jq -r '.thinking.enabled // false')
 rate5h_pct=$(echo "$input"   | jq -r '.rate_limits.five_hour.used_percentage // empty')
@@ -20,7 +37,6 @@ rate7d_pct=$(echo "$input"   | jq -r '.rate_limits.seven_day.used_percentage // 
 rate7d_at=$(echo "$input"    | jq -r '.rate_limits.seven_day.resets_at // empty')
 
 # ─── theme palette ────────────────────────────────────────────────────────
-# 5 colors per theme: model / context / 5h / 7d / duration. Truecolor escapes.
 theme=$(cat "$HOME/.tmux-theme" 2>/dev/null || echo atelier)
 case "$theme" in
     glacier)            MOD='\033[38;2;180;190;254m'; CTX='\033[38;2;148;226;213m'; LIM5='\033[38;2;166;227;161m'; LIM7='\033[38;2;116;199;236m'; TIME='\033[38;2;137;220;235m' ;;
@@ -37,19 +53,12 @@ case "$theme" in
     *)                  MOD='\033[38;2;203;166;247m'; CTX='\033[38;2;245;194;231m'; LIM5='\033[38;2;249;226;175m'; LIM7='\033[38;2;180;190;254m'; TIME='\033[38;2;250;179;135m' ;;
 esac
 
-DIM='\033[2m'                    # dim modifier (no color), preserves segment hue
+DIM='\033[2m'
 SEP='\033[38;2;88;91;112m'
 RESET='\033[0m'
 BOLD='\033[1m'
 
 # ─── helpers ──────────────────────────────────────────────────────────────
-ctx_size_h=""
-if [ "$ctx_size" -ge 1000000 ] 2>/dev/null; then
-    ctx_size_h="$((ctx_size / 1000000))M"
-elif [ "$ctx_size" -ge 1000 ] 2>/dev/null; then
-    ctx_size_h="$((ctx_size / 1000))k"
-fi
-
 fmt_duration() {
     local ms=${1%.*}
     [ -z "$ms" ] || ! [ "$ms" -ge 0 ] 2>/dev/null && { echo "0s"; return; }
@@ -69,18 +78,13 @@ fmt_until() {
     local now
     now=$(date +%s)
     local delta=$((target - now))
-    if [ "$delta" -le 0 ]; then
-        echo "now"
-    elif [ "$delta" -lt 3600 ]; then
-        echo "$((delta / 60))m"
-    elif [ "$delta" -lt 86400 ]; then
-        echo "$((delta / 3600))h"
-    else
-        echo "$((delta / 86400))d"
+    if [ "$delta" -le 0 ]; then echo "now"
+    elif [ "$delta" -lt 3600 ]; then echo "$((delta / 60))m"
+    elif [ "$delta" -lt 86400 ]; then echo "$((delta / 3600))h"
+    else echo "$((delta / 86400))d"
     fi
 }
 
-# 5-segment mini-bar (▰▰▱▱▱)
 mini_bar5() {
     local pct=${1%.*}
     [ -z "$pct" ] || ! [ "$pct" -ge 0 ] 2>/dev/null && pct=0
@@ -99,46 +103,81 @@ duration_h=$(fmt_duration "$duration_ms")
 ctx_int=$(printf '%.0f' "$ctx_pct" 2>/dev/null || echo 0)
 ctx_bar=$(mini_bar5 "$ctx_int")
 
-# Thinking indicator
+# Short model name — strip parenthetical "(1M context)" for narrow layouts
+model_short=$(echo "$model" | sed -E 's/ *\([^)]*\)$//')
+
 think_mark=""
 [ "$thinking" = "true" ] && think_mark=" ${BOLD}${MOD}✱${RESET}"
 
 # ─── render ───────────────────────────────────────────────────────────────
 out=""
+sep="  ${SEP}·${RESET}  "
 
-# 1. Model + ✱
-# Note: model.display_name from Claude often already includes the context size
-# (e.g. "Opus 4.7 (1M context)"), so we don't append (size) ourselves to avoid
-# duplicates like "Opus 4.7 (1M context) (1M)".
-out+="${MOD} ${RESET} ${BOLD}${MOD}${model}${RESET}"
-out+="${think_mark}"
+case "$layout" in
+    narrow)
+        # 1. Model (short) + ✱
+        out+="${MOD}${RESET} ${BOLD}${MOD}${model_short}${RESET}${think_mark}"
+        # 2. Context
+        out+="${sep}${CTX}${ctx_bar} ${ctx_int}%${RESET}"
+        # 3. 5h limit (if present) — no bar, no reset
+        if [ -n "$rate5h_pct" ] && [ "$rate5h_pct" != "null" ]; then
+            r=$(printf '%.0f' "$rate5h_pct" 2>/dev/null || echo 0)
+            out+="${sep}${LIM5}5h ${r}%${RESET}"
+        fi
+        # 4. 7d limit
+        if [ -n "$rate7d_pct" ] && [ "$rate7d_pct" != "null" ]; then
+            r=$(printf '%.0f' "$rate7d_pct" 2>/dev/null || echo 0)
+            out+="${sep}${LIM7}7d ${r}%${RESET}"
+        fi
+        ;;
 
-# 2. Context — bar + % (all CTX color)
-out+="  ${SEP}·${RESET}  "
-out+="${CTX}${ctx_bar} ${ctx_int}%${RESET}"
+    medium)
+        # 1. Model (short) + ✱
+        out+="${MOD}${RESET} ${BOLD}${MOD}${model_short}${RESET}${think_mark}"
+        # 2. Context bar + %
+        out+="${sep}${CTX}${ctx_bar} ${ctx_int}%${RESET}"
+        # 3. 5h limit % + reset (no inner bar)
+        if [ -n "$rate5h_pct" ] && [ "$rate5h_pct" != "null" ]; then
+            r=$(printf '%.0f' "$rate5h_pct" 2>/dev/null || echo 0)
+            until_5h=$(fmt_until "$rate5h_at")
+            out+="${sep}${LIM5}⏱ 5h ${r}%${RESET}"
+            [ -n "$until_5h" ] && out+=" ${LIM5}${DIM}↻${until_5h}${RESET}"
+        fi
+        # 4. 7d limit
+        if [ -n "$rate7d_pct" ] && [ "$rate7d_pct" != "null" ]; then
+            r=$(printf '%.0f' "$rate7d_pct" 2>/dev/null || echo 0)
+            until_7d=$(fmt_until "$rate7d_at")
+            out+="${sep}${LIM7} 7d ${r}%${RESET}"
+            [ -n "$until_7d" ] && out+=" ${LIM7}${DIM}↻${until_7d}${RESET}"
+        fi
+        # 5. Duration
+        out+="${sep}${TIME} ${duration_h}${RESET}"
+        ;;
 
-# 3. 5-hour limit — bar + % + reset (all LIM5 color)
-if [ -n "$rate5h_pct" ] && [ "$rate5h_pct" != "null" ]; then
-    rate5h_int=$(printf '%.0f' "$rate5h_pct" 2>/dev/null || echo 0)
-    rate5h_bar=$(mini_bar5 "$rate5h_int")
-    until_5h=$(fmt_until "$rate5h_at")
-    out+="  ${SEP}·${RESET}  "
-    out+="${LIM5}⏱ 5h ${rate5h_bar} ${rate5h_int}%${RESET}"
-    [ -n "$until_5h" ] && out+=" ${LIM5}${DIM}↻${until_5h}${RESET}"
-fi
-
-# 4. 7-day limit — bar + % + reset (all LIM7 color)
-if [ -n "$rate7d_pct" ] && [ "$rate7d_pct" != "null" ]; then
-    rate7d_int=$(printf '%.0f' "$rate7d_pct" 2>/dev/null || echo 0)
-    rate7d_bar=$(mini_bar5 "$rate7d_int")
-    until_7d=$(fmt_until "$rate7d_at")
-    out+="  ${SEP}·${RESET}  "
-    out+="${LIM7} 7d ${rate7d_bar} ${rate7d_int}%${RESET}"
-    [ -n "$until_7d" ] && out+=" ${LIM7}${DIM}↻${until_7d}${RESET}"
-fi
-
-# 5. Duration — TIME color (no longer gray)
-out+="  ${SEP}·${RESET}  "
-out+="${TIME} ${duration_h}${RESET}"
+    full|*)
+        # 1. Full model name + ✱
+        out+="${MOD} ${RESET} ${BOLD}${MOD}${model}${RESET}${think_mark}"
+        # 2. Context
+        out+="${sep}${CTX}${ctx_bar} ${ctx_int}%${RESET}"
+        # 3. 5h with inner bar + reset
+        if [ -n "$rate5h_pct" ] && [ "$rate5h_pct" != "null" ]; then
+            r=$(printf '%.0f' "$rate5h_pct" 2>/dev/null || echo 0)
+            r_bar=$(mini_bar5 "$r")
+            until_5h=$(fmt_until "$rate5h_at")
+            out+="${sep}${LIM5}⏱ 5h ${r_bar} ${r}%${RESET}"
+            [ -n "$until_5h" ] && out+=" ${LIM5}${DIM}↻${until_5h}${RESET}"
+        fi
+        # 4. 7d with inner bar + reset
+        if [ -n "$rate7d_pct" ] && [ "$rate7d_pct" != "null" ]; then
+            r=$(printf '%.0f' "$rate7d_pct" 2>/dev/null || echo 0)
+            r_bar=$(mini_bar5 "$r")
+            until_7d=$(fmt_until "$rate7d_at")
+            out+="${sep}${LIM7} 7d ${r_bar} ${r}%${RESET}"
+            [ -n "$until_7d" ] && out+=" ${LIM7}${DIM}↻${until_7d}${RESET}"
+        fi
+        # 5. Duration
+        out+="${sep}${TIME} ${duration_h}${RESET}"
+        ;;
+esac
 
 printf '%b' "$out"
