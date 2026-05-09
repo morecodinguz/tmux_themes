@@ -61,6 +61,17 @@ tmux-switch list      # opens fzf picker
 
 ---
 
+## Per-theme shell colors (optional)
+
+Switching the tmux bar isn't the whole story — the **shell** can change colors too. If you use **zsh + Powerlevel10k + zsh-syntax-highlighting + zsh-autosuggestions**, the switcher will also re-color:
+
+- Powerlevel10k prompt segments (path, git branch, time, prompt char)
+- zsh-syntax-highlighting tokens (commands, paths, strings, options, comments, errors)
+- zsh-autosuggestions ghost text
+- `ls` output via `LS_COLORS` (requires GNU `ls`, i.e. `gls` from Homebrew coreutils)
+
+Add the integration block from `install.sh` to your `~/.zshrc`. Then every `tmux-switch` swap re-sources `~/.shell-theme.zsh` and reloads p10k — your prompt, typed commands, and `ls` output all change live in the current shell.
+
 ## Layout
 
 ```
@@ -71,6 +82,8 @@ tmux_themes/
 │   ├── _common.tmux       # shared options + key bindings
 │   ├── _meta.tsv          # theme name → description (drives picker)
 │   └── *.tmux.conf        # 11 theme configs
+├── shell/                 # 11 per-theme zsh color packs
+│   └── *.zsh              # p10k overrides + syntax highlighting + LS_COLORS
 ├── helpers/
 │   ├── cpu.sh, mem.sh
 │   ├── battery.sh

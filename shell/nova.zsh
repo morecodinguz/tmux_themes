@@ -1,0 +1,31 @@
+# NOVA — nord-style: frost cyan / green / yellow / orange
+typeset -g POWERLEVEL9K_DIR_FOREGROUND='#88c0d0'
+typeset -g POWERLEVEL9K_DIR_SHORTENED_FOREGROUND='#4c566a'
+typeset -g POWERLEVEL9K_DIR_ANCHOR_FOREGROUND='#eceff4'
+typeset -g POWERLEVEL9K_VCS_CLEAN_FOREGROUND='#a3be8c'
+typeset -g POWERLEVEL9K_VCS_UNTRACKED_FOREGROUND='#a3be8c'
+typeset -g POWERLEVEL9K_VCS_MODIFIED_FOREGROUND='#ebcb8b'
+typeset -g POWERLEVEL9K_TIME_FOREGROUND='#ebcb8b'
+typeset -g POWERLEVEL9K_PROMPT_CHAR_OK_{VIINS,VICMD,VIVIS,VIOWR}_FOREGROUND='#d08770'
+typeset -g POWERLEVEL9K_PROMPT_CHAR_ERROR_{VIINS,VICMD,VIVIS,VIOWR}_FOREGROUND='#bf616a'
+
+typeset -gA ZSH_HIGHLIGHT_STYLES
+ZSH_HIGHLIGHT_STYLES[command]='fg=#a3be8c'
+ZSH_HIGHLIGHT_STYLES[alias]='fg=#a3be8c'
+ZSH_HIGHLIGHT_STYLES[builtin]='fg=#a3be8c'
+ZSH_HIGHLIGHT_STYLES[function]='fg=#a3be8c'
+ZSH_HIGHLIGHT_STYLES[hashed-command]='fg=#a3be8c'
+ZSH_HIGHLIGHT_STYLES[precommand]='fg=#a3be8c,italic'
+ZSH_HIGHLIGHT_STYLES[path]='fg=#88c0d0'
+ZSH_HIGHLIGHT_STYLES[path_pathseparator]='fg=#4c566a'
+ZSH_HIGHLIGHT_STYLES[single-quoted-argument]='fg=#ebcb8b'
+ZSH_HIGHLIGHT_STYLES[double-quoted-argument]='fg=#ebcb8b'
+ZSH_HIGHLIGHT_STYLES[single-hyphen-option]='fg=#b48ead'
+ZSH_HIGHLIGHT_STYLES[double-hyphen-option]='fg=#b48ead'
+ZSH_HIGHLIGHT_STYLES[comment]='fg=#4c566a,italic'
+ZSH_HIGHLIGHT_STYLES[unknown-token]='fg=#bf616a,bold'
+ZSH_HIGHLIGHT_STYLES[redirection]='fg=#b48ead'
+
+typeset -g ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=#3b4252'
+
+export LS_COLORS='di=38;2;136;192;208:ln=38;2;180;142;173:ex=38;2;163;190;140:fi=0:bd=38;2;235;203;139:cd=38;2;235;203;139:so=38;2;208;135;112:pi=38;2;208;135;112:or=38;2;191;97;106:mi=38;2;191;97;106:su=38;2;163;190;140:sg=38;2;163;190;140'

@@ -93,16 +93,34 @@ if [[ ! -L "$HOME/.tmux.conf" && ! -e "$HOME/.tmux.conf" ]]; then
     "$REPO_DIR/tmux-switch.sh" "$(cat "$HOME/.tmux-theme")" || true
 fi
 
-# ─── 4. Add zsh alias suggestion ────────────────────────────────────────
+# ─── 4. Optional shell coloring (zsh + Powerlevel10k) ──────────────────────
 say "Setup complete"
 echo
 echo "Next steps:"
-echo "  1. Add this alias to your ~/.zshrc (or ~/.bashrc):"
-echo "       alias tmux-switch='~/.tmux-switch.sh'"
+echo "  1. Add this block to your ~/.zshrc (replace any old tmux-switch alias):"
+echo
+cat <<'SHELL_HOOK'
+       # ─── tmux_themes integration ────────────────────────────────────
+       command -v gls >/dev/null && alias ls='gls --color=auto'
+       [[ -f ~/.shell-theme.zsh ]] && source ~/.shell-theme.zsh
+       unalias tmux-switch 2>/dev/null
+       tmux-switch() {
+           ~/.tmux-switch.sh "$@"
+           if [[ -f ~/.shell-theme.zsh ]]; then
+               source ~/.shell-theme.zsh
+               type p10k >/dev/null 2>&1 && p10k reload 2>/dev/null
+           fi
+       }
+SHELL_HOOK
+echo
 echo "  2. Reload your shell, then try:"
-echo "       tmux-switch list      # interactive picker"
+echo "       tmux-switch list      # interactive picker (vim-style hjkl)"
 echo "       tmux-switch           # cycle next theme"
 echo "       tmux-switch atelier   # jump to atelier"
 echo
 echo "  3. For best rendering, set your terminal font to a Nerd Font"
 echo "     (e.g. JetBrainsMono Nerd Font Mono)."
+echo
+echo "  Per-theme prompt + syntax-highlighting + ls colors will switch live"
+echo "  with each tmux-switch invocation. Other open shells need to source"
+echo "  ~/.zshrc again or open a new shell to pick up the new colors."

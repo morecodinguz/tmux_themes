@@ -73,9 +73,16 @@ apply_theme() {
         exit 1
     fi
 
+    # Tmux config symlink
     rm -f "$TMUX_CONF"
     ln -s "$conf" "$TMUX_CONF"
     echo "$theme" > "$THEME_FILE"
+
+    # Shell-theme symlink (Powerlevel10k + zsh-syntax-highlighting + LS_COLORS)
+    local shell_conf="$HOME/tmux_themes/shell/$theme.zsh"
+    if [[ -f "$shell_conf" ]]; then
+        ln -sfn "$shell_conf" "$HOME/.shell-theme.zsh"
+    fi
 
     if tmux info >/dev/null 2>&1; then
         tmux source-file "$TMUX_CONF" 2>/dev/null || true

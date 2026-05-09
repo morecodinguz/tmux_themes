@@ -1,0 +1,31 @@
+# TMUX-POWER — gold / orange / red-orange
+typeset -g POWERLEVEL9K_DIR_FOREGROUND='#ffd700'
+typeset -g POWERLEVEL9K_DIR_SHORTENED_FOREGROUND='#7f7f7f'
+typeset -g POWERLEVEL9K_DIR_ANCHOR_FOREGROUND='#ffffff'
+typeset -g POWERLEVEL9K_VCS_CLEAN_FOREGROUND='#ffaf00'
+typeset -g POWERLEVEL9K_VCS_UNTRACKED_FOREGROUND='#ffaf00'
+typeset -g POWERLEVEL9K_VCS_MODIFIED_FOREGROUND='#ff8c00'
+typeset -g POWERLEVEL9K_TIME_FOREGROUND='#ff8c00'
+typeset -g POWERLEVEL9K_PROMPT_CHAR_OK_{VIINS,VICMD,VIVIS,VIOWR}_FOREGROUND='#ffd700'
+typeset -g POWERLEVEL9K_PROMPT_CHAR_ERROR_{VIINS,VICMD,VIVIS,VIOWR}_FOREGROUND='#ff5555'
+
+typeset -gA ZSH_HIGHLIGHT_STYLES
+ZSH_HIGHLIGHT_STYLES[command]='fg=#ffd700,bold'
+ZSH_HIGHLIGHT_STYLES[alias]='fg=#ffd700,bold'
+ZSH_HIGHLIGHT_STYLES[builtin]='fg=#ffd700,bold'
+ZSH_HIGHLIGHT_STYLES[function]='fg=#ffd700,bold'
+ZSH_HIGHLIGHT_STYLES[hashed-command]='fg=#ffd700,bold'
+ZSH_HIGHLIGHT_STYLES[precommand]='fg=#ffd700,italic'
+ZSH_HIGHLIGHT_STYLES[path]='fg=#ffaf00'
+ZSH_HIGHLIGHT_STYLES[path_pathseparator]='fg=#7f7f7f'
+ZSH_HIGHLIGHT_STYLES[single-quoted-argument]='fg=#ffaf87'
+ZSH_HIGHLIGHT_STYLES[double-quoted-argument]='fg=#ffaf87'
+ZSH_HIGHLIGHT_STYLES[single-hyphen-option]='fg=#87ceeb'
+ZSH_HIGHLIGHT_STYLES[double-hyphen-option]='fg=#87ceeb'
+ZSH_HIGHLIGHT_STYLES[comment]='fg=#555555,italic'
+ZSH_HIGHLIGHT_STYLES[unknown-token]='fg=#ff5555,bold'
+ZSH_HIGHLIGHT_STYLES[redirection]='fg=#ff8c00'
+
+typeset -g ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=#444444'
+
+export LS_COLORS='di=38;2;255;215;0:ln=38;2;135;206;235:ex=38;2;255;175;0:fi=0:bd=38;2;255;215;0:cd=38;2;255;215;0:so=38;2;255;140;0:pi=38;2;255;140;0:or=38;2;255;85;85:mi=38;2;255;85;85:su=38;2;255;175;0:sg=38;2;255;175;0'
