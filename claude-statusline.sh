@@ -106,9 +106,11 @@ think_mark=""
 # ─── render ───────────────────────────────────────────────────────────────
 out=""
 
-# 1. Model + (size) + ✱
+# 1. Model + ✱
+# Note: model.display_name from Claude often already includes the context size
+# (e.g. "Opus 4.7 (1M context)"), so we don't append (size) ourselves to avoid
+# duplicates like "Opus 4.7 (1M context) (1M)".
 out+="${MOD} ${RESET} ${BOLD}${MOD}${model}${RESET}"
-[ -n "$ctx_size_h" ] && out+=" ${MOD}${DIM}(${ctx_size_h})${RESET}"
 out+="${think_mark}"
 
 # 2. Context — bar + % (all CTX color)

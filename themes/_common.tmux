@@ -39,3 +39,9 @@ set -g repeat-time 600
 
 # Reload bound to r
 bind r source-file ~/.tmux.conf \; display-message "Reloaded ~/.tmux.conf"
+
+# Status-bar length budgets — generous defaults so themes don't get aggressively
+# truncated on narrow panes (default tmux is 10/20 chars, way too small for any
+# modern theme). Per-theme confs may still override these if they need.
+set -g status-left-length 250
+set -g status-right-length 250
