@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Tmux Bar Redesigns — v2: 3 variants per theme</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&family=IBM+Plex+Serif:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --crust: #11111b; --mantle: #181825; --base: #1e1e2e;
+    --surface0: #313244; --surface1: #45475a; --surface2: #585b70;
+    --overlay0: #6c7086; --overlay1: #7f849c; --overlay2: #9399b2;
+    --subtext0: #a6adc8; --subtext1: #bac2de; --text: #cdd6f4;
+    --lavender: #b4befe; --blue: #89b4fa; --sapphire: #74c7ec; --sky: #89dceb;
+    --teal: #94e2d5; --green: #a6e3a1; --yellow: #f9e2af; --peach: #fab387;
+    --maroon: #eba0ac; --red: #f38ba8; --mauve: #cba6f7; --pink: #f5c2e7;
+    --flamingo: #f2cdcd; --rosewater: #f5e0dc;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 40px 32px 80px;
+    background: #08080d; color: var(--text);
+    font-family: 'Inter', -apple-system, system-ui, sans-serif;
+    line-height: 1.55;
+  }
+  .container { max-width: 1240px; margin: 0 auto; }
+  h1 { font-size: 30px; margin: 0 0 6px; color: #fff; letter-spacing: -0.02em; }
+  .lead { color: var(--overlay2); margin: 0 0 48px; font-size: 14.5px; max-width: 820px; }
+
+  .theme-section { margin-bottom: 64px; }
+  .theme-section > .head {
+    display: flex; align-items: baseline; gap: 14px;
+    padding-bottom: 12px; margin-bottom: 24px;
+    border-bottom: 1px solid #ffffff10;
+  }
+  .theme-section > .head h2 { font-size: 24px; margin: 0; color: #fff; letter-spacing: -0.01em; }
+  .temp {
+    font-size: 11px; padding: 4px 10px; border-radius: 999px;
+    font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .temp-cool { background: rgba(116,199,236,0.13); color: var(--sapphire); border: 1px solid rgba(116,199,236,0.35); }
+  .temp-pastel { background: rgba(203,166,247,0.13); color: var(--mauve); border: 1px solid rgba(203,166,247,0.35); }
+  .temp-warm { background: rgba(250,179,135,0.13); color: var(--peach); border: 1px solid rgba(250,179,135,0.35); }
+
+  /* variant card */
+  .variant {
+    margin-bottom: 28px;
+    background: #0e0e15; border: 1px solid #ffffff08;
+    border-radius: 10px; padding: 18px 20px;
+  }
+  .variant.recap { opacity: 0.78; }
+  .variant.recap::before { content: 'PREVIOUS'; }
+  .variant.fresh::before { content: 'NEW'; background: rgba(166,227,161,0.13); color: var(--green); border-color: rgba(166,227,161,0.35); }
+  .variant::before {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    font-weight: 700; letter-spacing: 0.08em;
+    background: rgba(255,255,255,0.06); color: var(--overlay2);
+    padding: 2px 8px; border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.08);
+    margin-right: 10px; vertical-align: 2px;
+  }
+  .variant h3 {
+    display: inline; font-size: 17px; margin: 0;
+    color: #fff; font-weight: 600; letter-spacing: -0.01em;
+  }
+  .variant .desc {
+    color: var(--subtext0); font-size: 13.5px;
+    margin: 8px 0 14px;
+  }
+  .variant .desc b { color: var(--text); }
+
+  /* bar wrapper */
+  .barwrap {
+    border-radius: 6px; overflow: hidden;
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.04), 0 8px 24px rgba(0,0,0,0.4);
+  }
+  .bar {
+    display: flex; align-items: stretch;
+    height: 28px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px; font-weight: 500;
+    overflow: hidden; user-select: none;
+    white-space: nowrap;
+  }
+  .seg { padding: 0 12px; display: flex; align-items: center; gap: 6px; height: 100%; }
+  .gap { flex: 1; }
+
+  .cap { width: 14px; height: 28px; flex: 0 0 14px; position: relative; }
+  .cap::before { content: ''; position: absolute; inset: 0; background: var(--from); clip-path: polygon(0 0, 100% 0, 0 100%); }
+  .cap::after { content: ''; position: absolute; inset: 0; background: var(--to); clip-path: polygon(100% 0, 100% 100%, 0 100%); }
+  .pill-cap-l, .pill-cap-r { width: 10px; height: 28px; flex: 0 0 10px; position: relative; }
+  .pill-cap-l::before, .pill-cap-r::before { content: ''; position: absolute; inset: 0; background: var(--bg); }
+  .pill-cap-l::before { clip-path: ellipse(100% 50% at 100% 50%); }
+  .pill-cap-r::before { clip-path: ellipse(100% 50% at 0% 50%); }
+
+  /* outlined neon pill */
+  .neon {
+    border: 1px solid currentColor;
+    border-radius: 4px;
+    padding: 0 10px; height: 20px; line-height: 18px;
+    margin: 0 4px;
+    font-weight: 600; letter-spacing: 0.04em;
+    text-shadow: 0 0 8px currentColor, 0 0 2px currentColor;
+    box-shadow: 0 0 6px -2px currentColor, inset 0 0 6px -3px currentColor;
+    align-self: center;
+  }
+
+  /* pip / mini-bar graph */
+  .pips { display: inline-flex; gap: 1.5px; align-items: center; height: 12px; vertical-align: middle; }
+  .pips span { width: 4px; height: 12px; background: currentColor; opacity: 0.25; display: inline-block; }
+  .pips span.on { opacity: 1; }
+
+  .spark { display: inline-flex; gap: 1px; align-items: flex-end; height: 14px; }
+  .spark span { width: 3px; background: currentColor; display: inline-block; }
+
+  /* tab look */
+  .tab {
+    height: 26px; padding: 0 14px;
+    display: flex; align-items: center; gap: 6px;
+    border-radius: 6px 6px 0 0;
+    margin-right: 2px;
+    font-size: 12.5px;
+  }
+
+  /* tier (two-line) */
+  .tier { display: flex; flex-direction: column; }
+
+  /* palette swatches */
+  .palette { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .swatch {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: #131319; border: 1px solid #ffffff10;
+    padding: 3px 8px 3px 4px; border-radius: 5px;
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+  }
+  .swatch .chip { width: 12px; height: 12px; border-radius: 3px; }
+  .swatch .name { color: var(--overlay2); }
+  .swatch .hex { color: var(--text); }
+
+  .footer-note {
+    color: var(--overlay1); font-size: 12.5px;
+    margin-top: 56px; text-align: center;
+    font-family: 'JetBrains Mono', monospace;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Tmux Bar Redesigns — three variants per theme</h1>
+  <p class="lead">Each theme keeps its temperature identity (cool / pastel / warm) but you can pick a totally different <i>structural</i> direction. Every bar uses the exact catppuccin mocha hex codes — no approximations.</p>
+
+  <!-- ============ TMUX2K ============ -->
+  <div class="theme-section">
+    <div class="head">
+      <h2>tmux2k</h2>
+      <span class="temp temp-cool">cool · bg #11111b</span>
+    </div>
+
+    <!-- Variant 1: Cool Cascade (recap) -->
+    <div class="variant recap">
+      <h3>Cool Cascade</h3>
+      <p class="desc">Powerline gradient sweep through cool palette. Dense info, sparkline CPU, segment-to-segment color flow.</p>
+      <div class="barwrap"><div class="bar" style="background:#11111b;">
+        <span class="seg" style="background:var(--lavender);color:var(--crust);font-weight:700;">▎ seah-claude </span>
+        <span class="cap" style="--from:var(--lavender);--to:var(--sapphire);"></span>
+        <span class="seg" style="background:var(--sapphire);color:var(--crust);">~/code/tmux-cfg</span>
+        <span class="cap" style="--from:var(--sapphire);--to:var(--green);"></span>
+        <span class="seg" style="background:var(--green);color:var(--crust);">⎇ main ↑2 ●3</span>
+        <span class="cap" style="--from:var(--green);--to:#11111b;"></span>
+        <span class="seg" style="color:var(--lavender);font-weight:700;">● 1 zsh</span>
+        <span class="seg" style="color:var(--surface2);">2 nvim</span>
+        <span class="seg" style="color:var(--surface2);">3 logs</span>
+        <span class="gap"></span>
+        <span class="seg" style="color:var(--sapphire);">CPU 38%
+          <span class="spark" style="color:var(--sapphire);">
+            <span style="height:3px"></span><span style="height:5px"></span><span style="height:8px"></span><span style="height:11px"></span><span style="height:9px"></span><span style="height:13px"></span><span style="height:7px"></span>
+          </span></span>
+        <span class="seg" style="color:var(--teal);">MEM 4.2G</span>
+        <span class="seg" style="color:var(--sky);">↓ 85K</span>
+        <span class="cap" style="--from:#11111b;--to:var(--green);"></span>
+        <span class="seg" style="background:var(--green);color:var(--crust);font-weight:700;">▮ 82%</span>
+        <span class="cap" style="--from:var(--green);--to:var(--lavender);"></span>
+        <span class="seg" style="background:var(--lavender);color:var(--crust);font-weight:700;">10:59</span>
+      </div></div>
+    </div>
+
+    <!-- Variant 2: Neon Console (NEW) -->
+    <div class="variant fresh">
+      <h3>Neon Console</h3>
+      <p class="desc">Cyberpunk instrument-panel feel. <b>Outline pills with neon glow</b>, hard rectangular blocks, mode indicator (NORMAL/COPY/PREFIX), bar-graph CPU + RAM, pip-style battery. Every metric is its own self-contained instrument.</p>
+      <div class="barwrap"><div class="bar" style="background:#11111b;">
+        <span class="seg" style="background:var(--sapphire);color:var(--crust);font-weight:800;letter-spacing:0.1em;font-size:11px;"> NORMAL </span>
+        <span class="seg" style="color:var(--lavender);"><span class="neon" style="color:var(--lavender);">seah-claude</span></span>
+        <span class="seg" style="color:var(--sapphire);"><span class="neon" style="color:var(--sapphire);">~/code/tmux</span></span>
+        <span class="seg" style="color:var(--green);"><span class="neon" style="color:var(--green);">⎇ main</span></span>
+        <span class="seg" style="color:var(--lavender);font-weight:800;">[1 zsh]</span>
+        <span class="seg" style="color:var(--surface2);">2 nvim</span>
+        <span class="seg" style="color:var(--surface2);">3 logs</span>
+        <span class="gap"></span>
+        <span class="seg" style="color:var(--sapphire);">CPU&nbsp;<span class="pips" style="color:var(--sapphire);"><span class="on"></span><span class="on"></span><span class="on"></span><span></span><span></span></span>&nbsp;38%</span>
+        <span class="seg" style="color:var(--teal);">MEM&nbsp;<span class="pips" style="color:var(--teal);"><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span></span></span>&nbsp;4.2G</span>
+        <span class="seg" style="color:var(--sky);">↓85K&nbsp;↑12K</span>
+        <span class="seg" style="color:var(--green);">BAT&nbsp;<span class="pips" style="color:var(--green);"><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span></span></span>&nbsp;82%</span>
+        <span class="seg" style="color:var(--lavender);"><span class="neon" style="color:var(--lavender);">10:59</span></span>
+      </div></div>
+      <div class="palette">
+        <span class="swatch"><span class="chip" style="background:#11111b"></span><span class="name">crust</span><span class="hex">#11111b</span></span>
+        <span class="swatch"><span class="chip" style="background:#b4befe"></span><span class="name">lavender</span><span class="hex">#b4befe</span></span>
+        <span class="swatch"><span class="chip" style="background:#74c7ec"></span><span class="name">sapphire</span><span class="hex">#74c7ec</span></span>
+        <span class="swatch"><span class="chip" style="background:#94e2d5"></span><span class="name">teal</span><span class="hex">#94e2d5</span></span>
+        <span class="swatch"><span class="chip" style="background:#a6e3a1"></span><span class="name">green</span><span class="hex">#a6e3a1</span></span>
+        <span class="swatch"><span class="chip" style="background:#89dceb"></span><span class="name">sky</span><span class="hex">#89dceb</span></span>
+      </div>
+    </div>
+
+    <!-- Variant 3: Telemetry Dashboard (NEW) -->
+    <div class="variant fresh">
+      <h3>Telemetry Dashboard</h3>
+      <p class="desc">Mini-Grafana feel. <b>Each metric is rendered as a graphic</b>, not text. CPU = sparkline, RAM = pip bar, network = mini histogram, battery = pip bar. Almost no labels — the shape <i>is</i> the data. Most information per pixel of any variant.</p>
+      <div class="barwrap"><div class="bar" style="background:#11111b;">
+        <span class="seg" style="background:var(--lavender);color:var(--crust);font-weight:700;"> seah-claude </span>
+        <span class="cap" style="--from:var(--lavender);--to:#11111b;"></span>
+        <span class="seg" style="color:var(--blue);">~/code/tmux</span>
+        <span class="seg" style="color:var(--surface2);">·</span>
+        <span class="seg" style="color:var(--green);">⎇ main+2</span>
+        <span class="seg" style="color:var(--surface2);">·</span>
+        <span class="seg" style="color:var(--lavender);font-weight:700;">●1 zsh</span>
+        <span class="seg" style="color:var(--surface2);">2 nvim</span>
+        <span class="seg" style="color:var(--surface2);">3 logs</span>
+        <span class="gap"></span>
+        <span class="seg" style="color:var(--sapphire);"><span class="spark" style="color:var(--sapphire);height:18px;">
+          <span style="height:4px"></span><span style="height:7px"></span><span style="height:10px"></span><span style="height:14px"></span><span style="height:11px"></span><span style="height:16px"></span><span style="height:13px"></span><span style="height:9px"></span><span style="height:6px"></span><span style="height:12px"></span>
+        </span></span>
+        <span class="seg" style="color:var(--surface2);">·</span>
+        <span class="seg" style="color:var(--teal);"><span class="pips" style="color:var(--teal);"><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span></span><span></span><span></span></span></span>
+        <span class="seg" style="color:var(--surface2);">·</span>
+        <span class="seg" style="color:var(--sky);"><span class="spark" style="color:var(--sky);height:14px;">
+          <span style="height:3px"></span><span style="height:6px"></span><span style="height:11px"></span><span style="height:5px"></span>
+        </span></span>
+        <span class="seg" style="color:var(--surface2);">·</span>
+        <span class="seg" style="color:var(--green);"><span class="pips" style="color:var(--green);"><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span></span></span>&nbsp;82%</span>
+        <span class="seg" style="color:var(--surface2);">·</span>
+        <span class="seg" style="color:var(--lavender);font-weight:700;">10:59</span>
+      </div></div>
+      <div class="palette">
+        <span class="swatch"><span class="chip" style="background:#11111b"></span><span class="name">crust</span><span class="hex">#11111b</span></span>
+        <span class="swatch"><span class="chip" style="background:#b4befe"></span><span class="name">lavender</span><span class="hex">#b4befe</span></span>
+        <span class="swatch"><span class="chip" style="background:#89b4fa"></span><span class="name">blue</span><span class="hex">#89b4fa</span></span>
+        <span class="swatch"><span class="chip" style="background:#74c7ec"></span><span class="name">sapphire</span><span class="hex">#74c7ec</span></span>
+        <span class="swatch"><span class="chip" style="background:#94e2d5"></span><span class="name">teal</span><span class="hex">#94e2d5</span></span>
+        <span class="swatch"><span class="chip" style="background:#89dceb"></span><span class="name">sky</span><span class="hex">#89dceb</span></span>
+        <span class="swatch"><span class="chip" style="background:#a6e3a1"></span><span class="name">green</span><span class="hex">#a6e3a1</span></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ CATPPUCCIN ============ -->
+  <div class="theme-section">
+    <div class="head">
+      <h2>catppuccin</h2>
+      <span class="temp temp-pastel">pastel · bg #1e1e2e</span>
+    </div>
+
+    <!-- Variant 1: Pastel Notebook (recap) -->
+    <div class="variant recap">
+      <h3>Pastel Notebook</h3>
+      <p class="desc">Single mauve session pill, everything else flat dot-separated. Spacious, asymmetric, anti-density.</p>
+      <div class="barwrap"><div class="bar" style="background:#1e1e2e;">
+        <span class="pill-cap-l" style="--bg:var(--mauve);"></span>
+        <span class="seg" style="background:var(--mauve);color:var(--base);font-weight:700;">  seah-claude</span>
+        <span class="pill-cap-r" style="--bg:var(--mauve);"></span>
+        <span class="seg" style="color:var(--lavender);font-weight:600;">&nbsp;&nbsp;&nbsp;&nbsp;1 · zsh</span>
+        <span class="seg" style="color:var(--overlay0);">2 · nvim</span>
+        <span class="seg" style="color:var(--overlay0);">3 · logs</span>
+        <span class="gap"></span>
+        <span class="seg" style="color:var(--subtext0);">~/code/tmux</span>
+        <span class="seg" style="color:var(--surface2);">·</span>
+        <span class="seg" style="color:var(--peach);font-weight:600;">main</span>
+        <span class="seg" style="color:var(--surface2);">·</span>
+        <span class="seg" style="color:var(--yellow);font-weight:600;">▮ 82%</span>
+        <span class="seg" style="color:var(--surface2);">·</span>
+        <span class="seg" style="color:var(--pink);font-weight:600;">10·59&nbsp;</span>
+      </div></div>
+    </div>
+
+    <!-- Variant 2: Boutique Hotel (NEW, two-line) -->
+    <div class="variant fresh">
+      <h3>Boutique Hotel</h3>
+      <p class="desc"><b>Two-line bar</b> with magazine-masthead typography. Top tier: session name centered, large, mauve, letterspaced — like a magazine title. Bottom tier: windows on left, status on right. Pure typography, intentionally airy. Most "designed" of the three.</p>
+      <div class="barwrap" style="background:#1e1e2e;">
+        <div class="bar" style="background:#1e1e2e;height:32px;justify-content:center;">
+          <span style="font-family:'IBM Plex Serif',serif;font-size:18px;color:var(--mauve);font-weight:700;letter-spacing:0.18em;text-transform:lowercase;">— seah-claude —</span>
+        </div>
+        <div class="bar" style="background:#1e1e2e;height:24px;border-top:1px solid var(--surface0);">
+          <span class="seg" style="color:var(--lavender);font-weight:600;font-size:11.5px;letter-spacing:0.04em;">▶ 1 zsh</span>
+          <span class="seg" style="color:var(--surface2);font-size:11.5px;">·</span>
+          <span class="seg" style="color:var(--overlay0);font-size:11.5px;">2 nvim</span>
+          <span class="seg" style="color:var(--surface2);font-size:11.5px;">·</span>
+          <span class="seg" style="color:var(--overlay0);font-size:11.5px;">3 logs</span>
+          <span class="gap"></span>
+          <span class="seg" style="color:var(--subtext0);font-size:11.5px;">~/code/tmux</span>
+          <span class="seg" style="color:var(--surface2);font-size:11.5px;">·</span>
+          <span class="seg" style="color:var(--peach);font-size:11.5px;font-weight:600;">main</span>
+          <span class="seg" style="color:var(--surface2);font-size:11.5px;">·</span>
+          <span class="seg" style="color:var(--yellow);font-size:11.5px;font-weight:600;">82%</span>
+          <span class="seg" style="color:var(--surface2);font-size:11.5px;">·</span>
+          <span class="seg" style="color:var(--pink);font-size:11.5px;font-weight:600;letter-spacing:0.06em;">10:59</span>
+        </div>
+      </div>
+      <div class="palette">
+        <span class="swatch"><span class="chip" style="background:#1e1e2e"></span><span class="name">base</span><span class="hex">#1e1e2e</span></span>
+        <span class="swatch"><span class="chip" style="background:#cba6f7"></span><span class="name">mauve</span><span class="hex">#cba6f7</span></span>
+        <span class="swatch"><span class="chip" style="background:#b4befe"></span><span class="name">lavender</span><span class="hex">#b4befe</span></span>
+        <span class="swatch"><span class="chip" style="background:#fab387"></span><span class="name">peach</span><span class="hex">#fab387</span></span>
+        <span class="swatch"><span class="chip" style="background:#f9e2af"></span><span class="name">yellow</span><span class="hex">#f9e2af</span></span>
+        <span class="swatch"><span class="chip" style="background:#f5c2e7"></span><span class="name">pink</span><span class="hex">#f5c2e7</span></span>
+      </div>
+    </div>
+
+    <!-- Variant 3: Tab Strip (NEW, two-line) -->
+    <div class="variant fresh">
+      <h3>Tab Strip</h3>
+      <p class="desc"><b>Two-line bar</b>, modern app feel. Top tier: session label on left, then windows as <b>browser-style tabs</b> with rounded top corners (active = mauve fill, inactive = surface bg). Bottom tier: status info as a clean strip. Very "VS Code / Arc browser" inspired.</p>
+      <div class="barwrap" style="background:#181825;">
+        <div class="bar" style="background:#181825;height:30px;align-items:flex-end;padding:0 4px;">
+          <span class="tab" style="background:transparent;color:var(--mauve);font-weight:700;letter-spacing:0.05em;font-size:11.5px;text-transform:uppercase;">seah-claude</span>
+          <span style="color:var(--surface2);align-self:center;margin:0 6px;">│</span>
+          <span class="tab" style="background:var(--mauve);color:var(--base);font-weight:700;">▶ 1 zsh</span>
+          <span class="tab" style="background:var(--surface0);color:var(--subtext1);">2 nvim</span>
+          <span class="tab" style="background:var(--surface0);color:var(--subtext1);">3 logs</span>
+          <span class="gap"></span>
+        </div>
+        <div class="bar" style="background:#1e1e2e;height:22px;border-top:2px solid var(--mauve);font-size:11.5px;">
+          <span class="seg" style="color:var(--subtext0);">▸ ~/code/tmux</span>
+          <span class="seg" style="color:var(--surface2);">·</span>
+          <span class="seg" style="color:var(--peach);font-weight:600;">⎇ main</span>
+          <span class="gap"></span>
+          <span class="seg" style="color:var(--yellow);font-weight:600;">▮▮▮▮▯ 82%</span>
+          <span class="seg" style="color:var(--surface2);">·</span>
+          <span class="seg" style="color:var(--pink);font-weight:700;">10:59&nbsp;</span>
+        </div>
+      </div>
+      <div class="palette">
+        <span class="swatch"><span class="chip" style="background:#181825"></span><span class="name">mantle</span><span class="hex">#181825</span></span>
+        <span class="swatch"><span class="chip" style="background:#1e1e2e"></span><span class="name">base</span><span class="hex">#1e1e2e</span></span>
+        <span class="swatch"><span class="chip" style="background:#313244"></span><span class="name">surface0</span><span class="hex">#313244</span></span>
+        <span class="swatch"><span class="chip" style="background:#cba6f7"></span><span class="name">mauve</span><span class="hex">#cba6f7</span></span>
+        <span class="swatch"><span class="chip" style="background:#fab387"></span><span class="name">peach</span><span class="hex">#fab387</span></span>
+        <span class="swatch"><span class="chip" style="background:#f9e2af"></span><span class="name">yellow</span><span class="hex">#f9e2af</span></span>
+        <span class="swatch"><span class="chip" style="background:#f5c2e7"></span><span class="name">pink</span><span class="hex">#f5c2e7</span></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ OHMYTMUX ============ -->
+  <div class="theme-section">
+    <div class="head">
+      <h2>ohmytmux</h2>
+      <span class="temp temp-warm">warm · bg #000000</span>
+    </div>
+
+    <!-- Variant 1: Stark Block (recap) -->
+    <div class="variant recap">
+      <h3>Stark Block</h3>
+      <p class="desc">Solid block frames around session, bracketed caps for branch, asymmetric weight. Brutalist.</p>
+      <div class="barwrap"><div class="bar" style="background:#000;">
+        <span class="seg" style="background:var(--rosewater);color:#000;font-weight:800;">▌</span>
+        <span class="seg" style="background:#000;color:var(--rosewater);font-weight:700;letter-spacing:0.04em;"> seah-claude </span>
+        <span class="seg" style="background:var(--rosewater);color:#000;font-weight:800;">▐</span>
+        <span class="seg" style="color:var(--peach);">&nbsp;&nbsp;1<span style="color:var(--surface2)">▎</span>zsh</span>
+        <span class="seg" style="color:var(--surface2);">2<span style="color:var(--surface2)">▎</span>nvim</span>
+        <span class="seg" style="color:var(--surface2);">3<span style="color:var(--surface2)">▎</span>logs</span>
+        <span class="gap"></span>
+        <span class="seg" style="color:var(--rosewater);font-weight:700;letter-spacing:0.06em;">[ <span style="color:var(--red)">MAIN</span> ]</span>
+        <span class="seg" style="color:var(--surface2);">|</span>
+        <span class="seg" style="color:var(--peach);font-weight:600;">82%</span>
+        <span class="seg" style="color:var(--surface2);">|</span>
+        <span class="seg" style="color:var(--text);font-weight:700;">10:59</span>
+        <span class="seg" style="color:var(--surface2);">|</span>
+        <span class="seg" style="color:var(--rosewater);letter-spacing:0.08em;font-weight:600;">WED·08·MAY&nbsp;</span>
+      </div></div>
+    </div>
+
+    <!-- Variant 2: Newspaper Masthead (NEW) -->
+    <div class="variant fresh">
+      <h3>Newspaper Masthead</h3>
+      <p class="desc"><b>Editorial masthead</b> aesthetic. Long horizontal lines flank the session name, ALL CAPS with dramatic letterspacing, red vertical bars as section dividers (like newspaper section breaks), date written out long. Reads like a print masthead from above-the-fold.</p>
+      <div class="barwrap"><div class="bar" style="background:#000;font-family:'JetBrains Mono',monospace;">
+        <span class="seg" style="color:var(--surface2);">━━━</span>
+        <span class="seg" style="color:var(--rosewater);font-weight:800;letter-spacing:0.18em;">SEAH-CLAUDE</span>
+        <span class="seg" style="color:var(--surface2);">━━━</span>
+        <span class="seg" style="color:var(--red);font-weight:700;">│</span>
+        <span class="seg" style="color:var(--peach);font-weight:700;letter-spacing:0.1em;font-size:11.5px;">1·ZSH</span>
+        <span class="seg" style="color:var(--red);font-weight:700;">│</span>
+        <span class="seg" style="color:var(--surface2);letter-spacing:0.1em;font-size:11.5px;">2·NVIM</span>
+        <span class="seg" style="color:var(--red);font-weight:700;">│</span>
+        <span class="seg" style="color:var(--surface2);letter-spacing:0.1em;font-size:11.5px;">3·LOGS</span>
+        <span class="gap"></span>
+        <span class="seg" style="color:var(--red);font-weight:700;">│</span>
+        <span class="seg" style="color:var(--rosewater);font-weight:700;letter-spacing:0.08em;">MAIN</span>
+        <span class="seg" style="color:var(--red);font-weight:700;">│</span>
+        <span class="seg" style="color:var(--peach);font-weight:600;">82%</span>
+        <span class="seg" style="color:var(--red);font-weight:700;">│</span>
+        <span class="seg" style="color:var(--text);font-weight:700;">10:59</span>
+        <span class="seg" style="color:var(--red);font-weight:700;">│</span>
+        <span class="seg" style="color:var(--rosewater);letter-spacing:0.12em;font-weight:600;font-size:11.5px;">WEDNESDAY MAY 8</span>
+        <span class="seg" style="color:var(--surface2);">━━</span>
+      </div></div>
+      <div class="palette">
+        <span class="swatch"><span class="chip" style="background:#000"></span><span class="name">black</span><span class="hex">#000000</span></span>
+        <span class="swatch"><span class="chip" style="background:#f5e0dc"></span><span class="name">rosewater</span><span class="hex">#f5e0dc</span></span>
+        <span class="swatch"><span class="chip" style="background:#fab387"></span><span class="name">peach</span><span class="hex">#fab387</span></span>
+        <span class="swatch"><span class="chip" style="background:#f38ba8"></span><span class="name">red</span><span class="hex">#f38ba8</span></span>
+        <span class="swatch"><span class="chip" style="background:#cdd6f4"></span><span class="name">text</span><span class="hex">#cdd6f4</span></span>
+      </div>
+    </div>
+
+    <!-- Variant 3: Vintage Terminal (NEW) -->
+    <div class="variant fresh">
+      <h3>Vintage Terminal</h3>
+      <p class="desc"><b>DEC / IBM PC-DOS</b> aesthetic. Bracketed <code>KEY=VALUE</code> labels, active window in inverse video block, F-key/prefix hint at the right. Mostly amber-rosewater on black with red accent on the active item. Looks like running EDIT.COM on a 386.</p>
+      <div class="barwrap"><div class="bar" style="background:#000;font-family:'JetBrains Mono',monospace;">
+        <span class="seg" style="color:var(--rosewater);">[</span>
+        <span class="seg" style="color:var(--rosewater);padding:0;font-weight:600;">SESSION</span>
+        <span class="seg" style="color:var(--surface2);padding:0;">=</span>
+        <span class="seg" style="color:var(--peach);padding:0;font-weight:700;">seah-claude</span>
+        <span class="seg" style="color:var(--rosewater);">]</span>
+        <span class="seg" style="color:var(--rosewater);padding-left:18px;">1=zsh</span>
+        <span class="seg" style="background:var(--red);color:#000;font-weight:800;letter-spacing:0.06em;">[2=NVIM]</span>
+        <span class="seg" style="color:var(--rosewater);">3=logs</span>
+        <span class="gap"></span>
+        <span class="seg" style="color:var(--peach);font-weight:600;">BR=main</span>
+        <span class="seg" style="color:var(--surface2);">·</span>
+        <span class="seg" style="color:var(--peach);font-weight:600;">BAT=82%</span>
+        <span class="seg" style="color:var(--surface2);">·</span>
+        <span class="seg" style="color:var(--rosewater);font-weight:700;">TIM=10:59</span>
+        <span class="seg" style="color:var(--surface2);">·</span>
+        <span class="seg" style="color:var(--red);font-weight:700;">PFX=^A&nbsp;</span>
+      </div></div>
+      <div class="palette">
+        <span class="swatch"><span class="chip" style="background:#000"></span><span class="name">black</span><span class="hex">#000000</span></span>
+        <span class="swatch"><span class="chip" style="background:#f5e0dc"></span><span class="name">rosewater</span><span class="hex">#f5e0dc</span></span>
+        <span class="swatch"><span class="chip" style="background:#fab387"></span><span class="name">peach</span><span class="hex">#fab387</span></span>
+        <span class="swatch"><span class="chip" style="background:#f38ba8"></span><span class="name">red</span><span class="hex">#f38ba8</span></span>
+      </div>
+    </div>
+  </div>
+
+  <p class="footer-note">
+    9 bars total · 3 variants × 3 themes · all using exact catppuccin mocha hex codes<br>
+    Glyphs shown with browser-safe Unicode equivalents — your real tmux will use Nerd Font icons (    󰂁 ⎇ )
+  </p>
+</div>
+</body>
+</html>

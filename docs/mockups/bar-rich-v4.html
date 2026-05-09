@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Tmux — Rich v4: Atelier redesigned (Floating Pastel)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --crust: #11111b; --mantle: #181825; --base: #1e1e2e;
+    --surface0: #313244; --surface1: #45475a; --surface2: #585b70;
+    --overlay0: #6c7086; --overlay1: #7f849c; --overlay2: #9399b2;
+    --subtext0: #a6adc8; --subtext1: #bac2de; --text: #cdd6f4;
+    --lavender: #b4befe; --blue: #89b4fa; --sapphire: #74c7ec; --sky: #89dceb;
+    --teal: #94e2d5; --green: #a6e3a1; --yellow: #f9e2af; --peach: #fab387;
+    --maroon: #eba0ac; --red: #f38ba8; --mauve: #cba6f7; --pink: #f5c2e7;
+    --flamingo: #f2cdcd; --rosewater: #f5e0dc;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 40px 32px 80px;
+    background: #08080d; color: var(--text);
+    font-family: 'Inter', -apple-system, system-ui, sans-serif;
+    line-height: 1.55;
+  }
+  .container { max-width: 1240px; margin: 0 auto; }
+  h1 { font-size: 30px; margin: 0 0 6px; color: #fff; letter-spacing: -0.02em; }
+  .lead { color: var(--overlay2); margin: 0 0 24px; font-size: 14.5px; max-width: 880px; }
+
+  .callout {
+    background: rgba(245,194,231,0.08);
+    border: 1px solid rgba(245,194,231,0.3);
+    border-radius: 8px;
+    padding: 14px 18px;
+    color: var(--subtext0);
+    font-size: 13.5px;
+    margin-bottom: 32px;
+  }
+  .callout b { color: var(--text); }
+
+  .theme-block { margin-bottom: 56px; }
+  .theme-head {
+    display: flex; align-items: baseline; gap: 14px;
+    margin-bottom: 16px;
+  }
+  .theme-head h2 { font-size: 22px; margin: 0; color: #fff; letter-spacing: -0.01em; }
+  .theme-head .name { color: var(--overlay2); font-weight: 400; font-size: 16px; margin-left: 4px; }
+  .theme-head .pattern {
+    font-size: 12px; padding: 3px 10px; border-radius: 4px;
+    font-weight: 600;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: var(--subtext0);
+  }
+  .keep-tag {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    color: var(--green); background: rgba(166,227,161,0.13);
+    border: 1px solid rgba(166,227,161,0.35);
+    padding: 2px 8px; border-radius: 999px; font-weight: 700; letter-spacing: 0.06em;
+  }
+  .updated-tag {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    color: var(--pink); background: rgba(245,194,231,0.15);
+    border: 1px solid rgba(245,194,231,0.4);
+    padding: 2px 8px; border-radius: 999px; font-weight: 700; letter-spacing: 0.06em;
+  }
+  .temp {
+    font-size: 11px; padding: 4px 10px; border-radius: 999px;
+    font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .temp-cool { background: rgba(116,199,236,0.13); color: var(--sapphire); border: 1px solid rgba(116,199,236,0.35); }
+  .temp-pastel { background: rgba(203,166,247,0.13); color: var(--mauve); border: 1px solid rgba(203,166,247,0.35); }
+  .temp-warm { background: rgba(250,179,135,0.13); color: var(--peach); border: 1px solid rgba(250,179,135,0.35); }
+  .bg-tag {
+    font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    color: var(--overlay1); margin-left: auto;
+  }
+  .bg-tag b { color: var(--text); }
+
+  /* terminal */
+  .term {
+    border-radius: 12px; overflow: hidden;
+    box-shadow: 0 30px 60px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.04);
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .titlebar {
+    background: #1c1c22; padding: 10px 14px;
+    display: flex; align-items: center; gap: 10px;
+    border-bottom: 1px solid #00000080;
+  }
+  .traffic { display: flex; gap: 7px; }
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dot-r { background: #ff5f56; } .dot-y { background: #ffbd2e; } .dot-g { background: #27c93f; }
+  .titlename {
+    flex: 1; text-align: center; color: var(--overlay0);
+    font-family: 'Inter'; font-size: 12px; font-weight: 500;
+  }
+
+  .shell {
+    min-height: 240px; padding: 14px 18px 0;
+    font-size: 13px; line-height: 1.55; color: var(--text);
+  }
+  .shell .pmt { color: var(--mauve); font-weight: 600; }
+  .shell .path { color: var(--blue); }
+  .shell .kw { color: var(--subtext0); }
+  .shell .git { color: var(--yellow); }
+  .shell .cmd-mark { color: var(--overlay1); }
+  .shell .cmd { color: var(--text); }
+  .shell .hash { color: var(--peach); }
+  .shell .msg { color: var(--subtext1); }
+  .shell .cur {
+    display: inline-block; width: 7px; height: 14px;
+    background: var(--text); vertical-align: -2px;
+    animation: blink 1s steps(2) infinite;
+  }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  /* bar */
+  .bar {
+    display: flex; align-items: stretch;
+    height: 28px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px; font-weight: 500;
+    overflow: hidden; user-select: none;
+    white-space: nowrap;
+  }
+  .seg { padding: 0 12px; display: flex; align-items: center; gap: 6px; height: 100%; }
+  .gap { flex: 1; }
+  .cap { width: 14px; height: 28px; flex: 0 0 14px; position: relative; }
+  .cap::before { content: ''; position: absolute; inset: 0; background: var(--from); clip-path: polygon(0 0, 100% 0, 0 100%); }
+  .cap::after { content: ''; position: absolute; inset: 0; background: var(--to); clip-path: polygon(100% 0, 100% 100%, 0 100%); }
+  .pill-cap-l, .pill-cap-r { width: 10px; height: 28px; flex: 0 0 10px; position: relative; }
+  .pill-cap-l::before, .pill-cap-r::before { content: ''; position: absolute; inset: 0; background: var(--bg); }
+  .pill-cap-l::before { clip-path: ellipse(100% 50% at 100% 50%); }
+  .pill-cap-r::before { clip-path: ellipse(100% 50% at 0% 50%); }
+
+  .pfx-slot {
+    width: 18px; flex: 0 0 18px;
+    display: flex; align-items: center; justify-content: center;
+    height: 100%; font-size: 9px;
+  }
+
+  .frame {
+    height: 22px; margin: 3px 4px;
+    display: flex; align-items: center;
+    border: 1px solid; border-radius: 4px;
+    padding: 0 2px;
+  }
+  .frame .seg { padding: 0 8px; }
+
+  .plate {
+    height: 22px; margin: 3px 4px;
+    display: flex; align-items: center;
+    border: 1px solid var(--rosewater);
+    padding: 0 8px;
+    color: var(--rosewater);
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    gap: 5px;
+  }
+
+  /* ATELIER v4 — Floating Pastel Pills.
+     Each segment is a self-contained rounded pill with a margin gap. */
+  .pp {
+    display: inline-flex; align-items: center;
+    height: 22px; margin: 3px 3px;
+    border-radius: 11px;
+    padding: 0 12px; gap: 6px;
+    font-weight: 700;
+    color: var(--base);
+  }
+  .pp.subtle {
+    background: var(--surface0);
+    color: var(--text);
+    font-weight: 500;
+  }
+  .pp.outline {
+    background: transparent;
+    border: 1px solid;
+    padding: 0 11px;
+  }
+
+  .changes {
+    margin-top: 16px;
+    background: rgba(255,255,255,0.025);
+    border-left: 3px solid var(--surface2);
+    padding: 12px 16px;
+    border-radius: 0 6px 6px 0;
+    font-size: 13px;
+    color: var(--subtext0);
+  }
+  .changes h4 {
+    margin: 0 0 8px; color: #fff; font-size: 13px;
+    font-weight: 600; letter-spacing: 0.02em; text-transform: uppercase;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .changes ul { margin: 4px 0; padding-left: 20px; }
+  .changes li { margin: 4px 0; }
+  .changes li b { color: var(--text); }
+
+  .palette { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .swatch {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: #131319; border: 1px solid #ffffff10;
+    padding: 5px 10px 5px 5px; border-radius: 6px;
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+  }
+  .swatch .chip { width: 16px; height: 16px; border-radius: 4px; }
+  .swatch .name { color: var(--overlay2); }
+  .swatch .hex { color: var(--text); font-weight: 500; }
+
+  .footer-note {
+    color: var(--overlay1); font-size: 12.5px;
+    margin-top: 56px; text-align: center;
+    font-family: 'JetBrains Mono', monospace;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Atelier redesigned — "Floating Pastel"</h1>
+  <p class="lead">Catppuccin's segmented panel was too quiet. Replaced with <b>floating pastel pills</b> — every segment is its own fully-rounded colored pill with visible gaps between them. Glacier (cascade) and Bauhaus (plates) unchanged.</p>
+
+  <div class="callout">
+    <b>Three distinct silhouettes now:</b><br>
+    Glacier — <b>connected cascade</b> (touching pills, diagonal notches)<br>
+    Atelier — <b>floating beads</b> (separated rounded pills, varied pastel colors)<br>
+    Bauhaus — <b>brutalist plates</b> (separated outlined boxes, sharp corners)
+  </div>
+
+  <!-- ============ ATELIER v4 (NEW — featured first) ============ -->
+  <div class="theme-block">
+    <div class="theme-head">
+      <h2>catppuccin <span class="name">— "Atelier"</span></h2>
+      <span class="pattern">FLOATING PASTEL PILLS</span>
+      <span class="temp temp-pastel">pastel</span>
+      <span class="updated-tag">REDESIGNED</span>
+      <span class="bg-tag">bar bg <b>#1e1e2e</b></span>
+    </div>
+
+    <div class="term">
+      <div class="titlebar">
+        <div class="traffic"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>
+        <div class="titlename">seah-claude — catppuccin — 132×34</div>
+      </div>
+      <div class="shell" style="background:#1e1e2e;">
+        <span class="pmt">❯</span> <span class="path">~/code/tmux</span> <span class="kw">on</span> <span class="git"> main</span>
+        <br><span class="cmd-mark">$</span> <span class="cmd">git log --oneline -3</span>
+        <br><span class="hash">a3f2d1c</span>  <span class="msg">refactor bar gradient logic</span>
+        <br><span class="hash">7e1b8a4</span>  <span class="msg">add network throughput segment</span>
+        <br><span class="hash">2c4f9e0</span>  <span class="msg">switch CPU to live sparkline</span>
+        <br><span class="pmt">❯</span> <span class="cur"></span>
+        <br>&nbsp;<br>&nbsp;<br>&nbsp;<br>
+
+        <div class="bar" style="background:#1e1e2e;">
+          <span class="pfx-slot" style="color:var(--surface2);">●</span>
+
+          <!-- Left bead chain: solid mauve / lavender / peach pills with gaps -->
+          <span class="pp" style="background:var(--mauve);">⌂ seah-claude</span>
+          <span class="pp" style="background:var(--lavender);">▸ ~/code/tmux</span>
+          <span class="pp" style="background:var(--peach);">⎇ main</span>
+
+          <!-- Window list as subtle surface0 pills -->
+          <span class="pp subtle"><span style="color:var(--mauve);font-weight:800;">●</span> <span style="color:var(--mauve);font-weight:700;">1 zsh</span></span>
+          <span class="pp subtle"><span style="color:var(--surface2);">○</span> <span style="color:var(--overlay0);font-weight:500;">2 nvim</span></span>
+          <span class="pp subtle"><span style="color:var(--surface2);">○</span> <span style="color:var(--overlay0);font-weight:500;">3 logs</span></span>
+
+          <span class="gap"></span>
+
+          <!-- Right bead chain: outlined stat pills + solid pink time pill -->
+          <span class="pp outline" style="border-color:var(--lavender);color:var(--lavender);">⌬ 38%</span>
+          <span class="pp outline" style="border-color:var(--teal);color:var(--teal);">▤ 4.2G</span>
+          <span class="pp outline" style="border-color:var(--yellow);color:var(--yellow);">▮ 82%</span>
+          <span class="pp" style="background:var(--pink);">⌚ 10·59</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="changes">
+      <h4>What's new</h4>
+      <ul>
+        <li><b>Every segment is a self-contained pill</b> with fully-rounded ends and visible gaps between them. Reads as a <i>chain of beads</i>, not a continuous bar.</li>
+        <li><b>Three pill styles for visual rhythm:</b><br>
+          • Solid pastel fills (session=mauve, path=lavender, branch=peach, time=pink) — the "loud" pills<br>
+          • Subtle surface0 fills (window list) — the "quiet" pills with mauve marker for active<br>
+          • Colored outlines (stats: lavender CPU, teal RAM, yellow battery) — the "ghost" pills
+        </li>
+        <li><b>Six different pastel colors active at once</b> — mauve, lavender, peach, teal, yellow, pink — much richer than the previous Atelier's single mauve+overlay.</li>
+        <li><b>Pink time pill</b> closes the chain, balancing the mauve session pill on the left (visual rhyme)</li>
+        <li><b>No cascade, no continuous block</b> — every pill stands alone, distinct from Glacier's flowing pattern</li>
+      </ul>
+    </div>
+
+    <div class="palette">
+      <span class="swatch"><span class="chip" style="background:#1e1e2e"></span><span class="name">base</span><span class="hex">#1e1e2e</span></span>
+      <span class="swatch"><span class="chip" style="background:#cba6f7"></span><span class="name">mauve</span><span class="hex">session</span></span>
+      <span class="swatch"><span class="chip" style="background:#b4befe"></span><span class="name">lavender</span><span class="hex">path / cpu</span></span>
+      <span class="swatch"><span class="chip" style="background:#fab387"></span><span class="name">peach</span><span class="hex">branch</span></span>
+      <span class="swatch"><span class="chip" style="background:#94e2d5"></span><span class="name">teal</span><span class="hex">ram</span></span>
+      <span class="swatch"><span class="chip" style="background:#f9e2af"></span><span class="name">yellow</span><span class="hex">battery</span></span>
+      <span class="swatch"><span class="chip" style="background:#f5c2e7"></span><span class="name">pink</span><span class="hex">time</span></span>
+      <span class="swatch"><span class="chip" style="background:#313244"></span><span class="name">surface0</span><span class="hex">window list bg</span></span>
+    </div>
+  </div>
+
+  <!-- ============ GLACIER (kept) ============ -->
+  <div class="theme-block">
+    <div class="theme-head">
+      <h2>tmux2k <span class="name">— "Glacier"</span></h2>
+      <span class="pattern">CASCADING POWERLINE</span>
+      <span class="temp temp-cool">cool</span>
+      <span class="keep-tag">UNCHANGED</span>
+      <span class="bg-tag">bar bg <b>#11111b</b></span>
+    </div>
+    <div style="border-radius:6px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,0.4),0 0 0 1px rgba(255,255,255,0.04);">
+      <div class="bar" style="background:#11111b;">
+        <span class="pfx-slot" style="color:var(--surface2);">●</span>
+        <span class="seg" style="background:var(--lavender);color:var(--crust);font-weight:700;">▸ seah-claude</span>
+        <span class="cap" style="--from:var(--lavender);--to:var(--sapphire);"></span>
+        <span class="seg" style="background:var(--sapphire);color:var(--crust);">▤ ~/code/tmux</span>
+        <span class="cap" style="--from:var(--sapphire);--to:var(--green);"></span>
+        <span class="seg" style="background:var(--green);color:var(--crust);">⎇ main ↑2 ●3</span>
+        <span class="cap" style="--from:var(--green);--to:#11111b;"></span>
+        <span class="seg" style="color:var(--lavender);font-weight:700;">● 1 zsh</span>
+        <span class="seg" style="color:var(--surface2);">○ 2 nvim</span>
+        <span class="seg" style="color:var(--surface2);">○ 3 logs</span>
+        <span class="gap"></span>
+        <span class="frame" style="border-color:var(--surface1);">
+          <span class="seg" style="color:var(--sapphire);">⌬ 38%</span>
+          <span style="color:var(--surface2);">›</span>
+          <span class="seg" style="color:var(--teal);">▤ 4.2G</span>
+          <span style="color:var(--surface2);">›</span>
+          <span class="seg" style="color:var(--sky);">↓ 85K</span>
+          <span style="color:var(--surface2);">›</span>
+          <span class="seg" style="color:var(--green);">▮ 82%</span>
+        </span>
+        <span class="cap" style="--from:#11111b;--to:var(--lavender);"></span>
+        <span class="seg" style="background:var(--lavender);color:var(--crust);font-weight:700;">⌚ 10:59</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ BAUHAUS (kept) ============ -->
+  <div class="theme-block">
+    <div class="theme-head">
+      <h2>ohmytmux <span class="name">— "Bauhaus"</span></h2>
+      <span class="pattern">BRUTALIST PLATES</span>
+      <span class="temp temp-warm">warm</span>
+      <span class="keep-tag">UNCHANGED</span>
+      <span class="bg-tag">bar bg <b>#000000</b></span>
+    </div>
+    <div style="border-radius:6px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,0.4),0 0 0 1px rgba(255,255,255,0.04);">
+      <div class="bar" style="background:#000;">
+        <span class="pfx-slot" style="color:var(--surface2);">●</span>
+        <span class="seg" style="background:var(--rosewater);color:#000;font-weight:800;padding:0 2px;letter-spacing:-0.05em;">▌▌▌</span>
+        <span class="seg" style="background:var(--rosewater);color:#000;font-weight:800;letter-spacing:0.06em;">⌂ SEAH-CLAUDE</span>
+        <span class="seg" style="background:var(--rosewater);color:#000;font-weight:800;padding:0 2px;letter-spacing:-0.05em;">▐▐▐</span>
+        <span class="seg" style="color:var(--peach);font-weight:800;">&nbsp;&nbsp;▶ 1 ZSH</span>
+        <span class="seg" style="color:var(--surface2);">▎</span>
+        <span class="seg" style="color:var(--overlay0);">2 NVIM</span>
+        <span class="seg" style="color:var(--surface2);">▎</span>
+        <span class="seg" style="color:var(--overlay0);">3 LOGS</span>
+        <span class="gap"></span>
+        <span class="plate"><span style="color:var(--red);">⎇</span> MAIN</span>
+        <span class="plate"><span style="color:var(--peach);">▮</span> 82%</span>
+        <span class="plate"><span style="color:var(--text);">⌚</span> 10:59</span>
+        <span class="plate" style="color:var(--rosewater);">WED·08·MAY</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ SIDE-BY-SIDE ============ -->
+  <h2 style="color:#fff;font-size:18px;margin-top:60px;margin-bottom:8px;letter-spacing:-0.01em;">All three together — three distinct silhouettes</h2>
+  <p style="color:var(--overlay2);font-size:13px;margin-top:0;margin-bottom:16px;">Squint test: cascade vs. floating beads vs. plates.</p>
+
+  <div style="display:flex;flex-direction:column;gap:14px;">
+    <div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--overlay1);margin-bottom:6px;">tmux2k · cascade</div>
+      <div class="bar" style="background:#11111b;border-radius:6px;">
+        <span class="pfx-slot" style="color:var(--surface2);">●</span>
+        <span class="seg" style="background:var(--lavender);color:var(--crust);font-weight:700;">▸ seah-claude</span>
+        <span class="cap" style="--from:var(--lavender);--to:var(--sapphire);"></span>
+        <span class="seg" style="background:var(--sapphire);color:var(--crust);">▤ ~/code/tmux</span>
+        <span class="cap" style="--from:var(--sapphire);--to:var(--green);"></span>
+        <span class="seg" style="background:var(--green);color:var(--crust);">⎇ main</span>
+        <span class="cap" style="--from:var(--green);--to:#11111b;"></span>
+        <span class="seg" style="color:var(--lavender);font-weight:700;">● 1 zsh</span>
+        <span class="seg" style="color:var(--surface2);">○ 2 nvim</span>
+        <span class="gap"></span>
+        <span class="frame" style="border-color:var(--surface1);">
+          <span class="seg" style="color:var(--sapphire);">⌬ 38%</span><span style="color:var(--surface2);">›</span>
+          <span class="seg" style="color:var(--teal);">▤ 4.2G</span><span style="color:var(--surface2);">›</span>
+          <span class="seg" style="color:var(--green);">▮ 82%</span>
+        </span>
+        <span class="cap" style="--from:#11111b;--to:var(--lavender);"></span>
+        <span class="seg" style="background:var(--lavender);color:var(--crust);font-weight:700;">⌚ 10:59</span>
+      </div>
+    </div>
+    <div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--overlay1);margin-bottom:6px;">catppuccin · floating beads</div>
+      <div class="bar" style="background:#1e1e2e;border-radius:6px;">
+        <span class="pfx-slot" style="color:var(--surface2);">●</span>
+        <span class="pp" style="background:var(--mauve);">⌂ seah-claude</span>
+        <span class="pp" style="background:var(--lavender);">▸ ~/code/tmux</span>
+        <span class="pp" style="background:var(--peach);">⎇ main</span>
+        <span class="pp subtle"><span style="color:var(--mauve);font-weight:800;">●</span> <span style="color:var(--mauve);font-weight:700;">1 zsh</span></span>
+        <span class="pp subtle"><span style="color:var(--surface2);">○</span> <span style="color:var(--overlay0);">2 nvim</span></span>
+        <span class="gap"></span>
+        <span class="pp outline" style="border-color:var(--lavender);color:var(--lavender);">⌬ 38%</span>
+        <span class="pp outline" style="border-color:var(--teal);color:var(--teal);">▤ 4.2G</span>
+        <span class="pp outline" style="border-color:var(--yellow);color:var(--yellow);">▮ 82%</span>
+        <span class="pp" style="background:var(--pink);">⌚ 10·59</span>
+      </div>
+    </div>
+    <div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--overlay1);margin-bottom:6px;">ohmytmux · plates</div>
+      <div class="bar" style="background:#000;border-radius:6px;">
+        <span class="pfx-slot" style="color:var(--surface2);">●</span>
+        <span class="seg" style="background:var(--rosewater);color:#000;font-weight:800;padding:0 2px;">▌▌▌</span>
+        <span class="seg" style="background:var(--rosewater);color:#000;font-weight:800;letter-spacing:0.06em;">⌂ SEAH-CLAUDE</span>
+        <span class="seg" style="background:var(--rosewater);color:#000;font-weight:800;padding:0 2px;">▐▐▐</span>
+        <span class="seg" style="color:var(--peach);font-weight:800;">&nbsp;&nbsp;▶ 1 ZSH</span>
+        <span class="seg" style="color:var(--surface2);">▎</span>
+        <span class="seg" style="color:var(--overlay0);">2 NVIM</span>
+        <span class="gap"></span>
+        <span class="plate"><span style="color:var(--red);">⎇</span> MAIN</span>
+        <span class="plate"><span style="color:var(--peach);">▮</span> 82%</span>
+        <span class="plate"><span style="color:var(--text);">⌚</span> 10:59</span>
+        <span class="plate" style="color:var(--rosewater);">WED·08·MAY</span>
+      </div>
+    </div>
+  </div>
+
+  <p class="footer-note">
+    Three patterns: <b>cascade</b> · <b>floating beads</b> · <b>plates</b><br>
+    Three temperatures: cool · pastel · warm
+  </p>
+</div>
+</body>
+</html>

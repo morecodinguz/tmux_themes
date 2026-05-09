@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Famous tmux bars — reference</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --crust: #11111b; --base: #1e1e2e; --surface0: #313244; --surface1: #45475a; --surface2: #585b70;
+    --overlay0: #6c7086; --overlay1: #7f849c; --overlay2: #9399b2;
+    --subtext0: #a6adc8; --subtext1: #bac2de; --text: #cdd6f4;
+    --lavender: #b4befe; --blue: #89b4fa; --sapphire: #74c7ec; --sky: #89dceb;
+    --teal: #94e2d5; --green: #a6e3a1; --yellow: #f9e2af; --peach: #fab387;
+    --maroon: #eba0ac; --red: #f38ba8; --mauve: #cba6f7; --pink: #f5c2e7;
+    --rosewater: #f5e0dc;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 40px 32px 80px;
+    background: #08080d; color: var(--text);
+    font-family: 'Inter', -apple-system, system-ui, sans-serif;
+    line-height: 1.55;
+  }
+  .container { max-width: 1240px; margin: 0 auto; }
+  h1 { font-size: 30px; margin: 0 0 6px; color: #fff; letter-spacing: -0.02em; }
+  h2 { font-size: 22px; color: #fff; margin: 56px 0 20px; letter-spacing: -0.01em; }
+  .lead { color: var(--overlay2); margin: 0 0 32px; font-size: 14.5px; max-width: 880px; }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+  }
+  @media (max-width: 880px) { .grid { grid-template-columns: 1fr; } }
+
+  .card {
+    background: #11111a;
+    border: 1px solid #ffffff10;
+    border-radius: 10px;
+    overflow: hidden;
+    display: flex; flex-direction: column;
+  }
+  .card-head {
+    padding: 14px 18px 8px;
+    display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap;
+  }
+  .card-head h3 {
+    margin: 0; font-size: 16px; color: #fff; font-weight: 600; letter-spacing: -0.01em;
+  }
+  .card-head .by {
+    color: var(--overlay1); font-size: 12.5px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .card-head .by a { color: var(--lavender); text-decoration: none; }
+  .card-head .by a:hover { text-decoration: underline; }
+  .card-image-wrap {
+    background: #000;
+    border-top: 1px solid #ffffff08;
+    border-bottom: 1px solid #ffffff08;
+    min-height: 100px;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+  }
+  .card-image-wrap img {
+    width: 100%; height: auto; display: block;
+    max-height: 340px; object-fit: contain;
+  }
+  .card-image-wrap .err {
+    color: var(--overlay0); font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    padding: 24px; text-align: center;
+  }
+  .card-desc {
+    padding: 12px 18px 16px;
+    color: var(--subtext0); font-size: 13px;
+  }
+  .pattern-tag {
+    display: inline-block;
+    font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+    font-family: 'JetBrains Mono', monospace;
+    padding: 2px 8px; border-radius: 4px;
+    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+    color: var(--overlay2);
+    margin-bottom: 8px;
+  }
+
+  .your-designs {
+    margin-top: 64px;
+    padding-top: 32px;
+    border-top: 2px solid var(--surface0);
+  }
+  .your-designs .lead { max-width: 880px; }
+  .bar {
+    display: flex; align-items: stretch;
+    height: 28px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px; font-weight: 500;
+    overflow: hidden; user-select: none;
+    white-space: nowrap;
+    border-radius: 6px;
+  }
+  .seg { padding: 0 12px; display: flex; align-items: center; gap: 6px; height: 100%; }
+  .gap { flex: 1; }
+  .cap { width: 14px; height: 28px; flex: 0 0 14px; position: relative; }
+  .cap::before { content: ''; position: absolute; inset: 0; background: var(--from); clip-path: polygon(0 0, 100% 0, 0 100%); }
+  .cap::after { content: ''; position: absolute; inset: 0; background: var(--to); clip-path: polygon(100% 0, 100% 100%, 0 100%); }
+  .pfx-slot { width: 18px; flex: 0 0 18px; display: flex; align-items: center; justify-content: center; height: 100%; font-size: 9px; }
+  .frame { height: 22px; margin: 3px 4px; display: flex; align-items: center; border: 1px solid; border-radius: 4px; padding: 0 2px; }
+  .frame .seg { padding: 0 8px; }
+  .pp { display: inline-flex; align-items: center; height: 22px; margin: 3px 3px; border-radius: 11px; padding: 0 12px; gap: 6px; font-weight: 700; color: var(--base); }
+  .pp.subtle { background: var(--surface0); color: var(--text); font-weight: 500; }
+  .pp.outline { background: transparent; border: 1px solid; padding: 0 11px; }
+  .plate { height: 22px; margin: 3px 4px; display: flex; align-items: center; border: 1px solid var(--rosewater); padding: 0 8px; color: var(--rosewater); font-weight: 700; letter-spacing: 0.04em; gap: 5px; }
+
+  .your-bar-row {
+    margin-bottom: 18px;
+  }
+  .your-bar-row .label {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    color: var(--overlay1); margin-bottom: 6px;
+  }
+  .your-bar-row .label b { color: var(--text); font-weight: 700; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Famous tmux bars — for comparison</h1>
+  <p class="lead">Eleven of the most popular tmux bars in the wild, pulled from their own README screenshots. Below them: your three approved designs (Glacier · Atelier · Bauhaus) so you can see how they compare. Most of the famous ones are <b>powerline cascades</b> — your set covers more structural ground.</p>
+
+  <div class="grid">
+
+    <div class="card">
+      <div class="card-head">
+        <h3>Catppuccin tmux</h3>
+        <span class="by">by <a href="https://github.com/catppuccin/tmux" target="_blank">catppuccin/tmux</a></span>
+      </div>
+      <div class="card-image-wrap"><img src="https://raw.githubusercontent.com/catppuccin/tmux/main/assets/mocha.webp" alt="Catppuccin tmux mocha"></div>
+      <div class="card-desc">
+        <span class="pattern-tag">rounded pills · pastel</span><br>
+        Soft pastel theme with rounded module separators in four flavors (Mocha, Macchiato, Frappé, Latte). Modular pill-style segments for session/window/metadata. The official catppuccin look — closest in spirit to your <b>Atelier</b>.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <h3>Oh My Tmux! (.tmux)</h3>
+        <span class="by">by <a href="https://github.com/gpakosz/.tmux" target="_blank">gpakosz</a></span>
+      </div>
+      <div class="card-image-wrap"><img src="https://cloud.githubusercontent.com/assets/553208/19740585/85596a5a-9bbf-11e6-8aa1-7c8d9829c008.gif" alt="Oh my tmux"></div>
+      <div class="card-desc">
+        <span class="pattern-tag">classic powerline</span><br>
+        The "default-ish" tmux look you see everywhere — arrow separators, hostname, uptime, battery, date/time on the right. The framework you're already using as ohmytmux base.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <h3>tmux2k</h3>
+        <span class="by">by <a href="https://github.com/2KAbhishek/tmux2k" target="_blank">2KAbhishek</a></span>
+      </div>
+      <div class="card-image-wrap"><img src="https://raw.githubusercontent.com/2KAbhishek/tmux2k/main/images/catppuccin.png" alt="tmux2k catppuccin"></div>
+      <div class="card-desc">
+        <span class="pattern-tag">powerline cascade</span><br>
+        Customizable powerline bar with chevron separators, plugin widgets (CPU, RAM, network, weather, battery), and multiple built-in palettes. The plugin powering your tmux2k slot — your <b>Glacier</b> is essentially a tighter, more deliberate version of this.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <h3>Dracula tmux</h3>
+        <span class="by">by <a href="https://github.com/dracula/tmux" target="_blank">dracula</a></span>
+      </div>
+      <div class="card-image-wrap"><img src="https://raw.githubusercontent.com/dracula/tmux/master/screenshot.png" alt="Dracula tmux"></div>
+      <div class="card-desc">
+        <span class="pattern-tag">powerline cascade · purple/pink</span><br>
+        Signature Dracula palette: deep purple bg, pink/cyan accents, powerline arrow separators, wide right-side widget cluster (weather, battery, time, GPU).
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <h3>Rosé Pine tmux</h3>
+        <span class="by">by <a href="https://github.com/rose-pine/tmux" target="_blank">rose-pine</a></span>
+      </div>
+      <div class="card-image-wrap"><img src="https://raw.githubusercontent.com/rose-pine/rose-pine-theme/main/assets/icon.png" alt="Rose Pine icon"></div>
+      <div class="card-desc">
+        <span class="pattern-tag">muted · minimalist</span><br>
+        Muted low-contrast pine/rose palette in Main, Moon, Dawn variants. Elegant minimal segments — quieter than catppuccin/dracula, more ambient than powerline. (README screenshots are signed-URL gated; logo shown.)
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <h3>Tokyo Night tmux</h3>
+        <span class="by">by <a href="https://github.com/janoamaral/tokyo-night-tmux" target="_blank">janoamaral</a></span>
+      </div>
+      <div class="card-image-wrap"><img src="https://raw.githubusercontent.com/janoamaral/tokyo-night-tmux/master/snaps/logico.png" alt="Tokyo Night tmux"></div>
+      <div class="card-desc">
+        <span class="pattern-tag">flat segments · neon accents</span><br>
+        Deep navy "downtown Tokyo at night" bg with neon blue/violet accents. Flat segments with Spotify, weather, battery, Git status. Modern and clean — closer to your <b>Atelier floating</b> idea but darker.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <h3>tmux-power</h3>
+        <span class="by">by <a href="https://github.com/wfxr/tmux-power" target="_blank">wfxr</a></span>
+      </div>
+      <div class="card-image-wrap"><img src="https://raw.githubusercontent.com/wfxr/i/master/tmux-power-gold.png" alt="tmux-power gold"></div>
+      <div class="card-desc">
+        <span class="pattern-tag">heavy powerline · single accent</span><br>
+        Bold powerline with arrow separators and saturated single-accent palettes (Gold, Moon, Coral, Everforest). Very high contrast — the "loudest" of the bunch. Aesthetic relative of your <b>Bauhaus</b>.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <h3>tmux-powerline (original)</h3>
+        <span class="by">by <a href="https://github.com/erikw/tmux-powerline" target="_blank">erikw</a></span>
+      </div>
+      <div class="card-image-wrap"><img src="https://raw.githubusercontent.com/erikw/tmux-powerline/main/img/full.png" alt="tmux-powerline"></div>
+      <div class="card-desc">
+        <span class="pattern-tag">classic powerline · grandfather</span><br>
+        The original / grandfather of all powerline-for-tmux setups: solid color blocks, sharp arrow separators, many segments (mail, mpd, weather, battery, hostname). What every modern theme is reacting to.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <h3>tmux-themepack</h3>
+        <span class="by">by <a href="https://github.com/jimeh/tmux-themepack" target="_blank">jimeh</a></span>
+      </div>
+      <div class="card-image-wrap"><img src="https://raw.githubusercontent.com/jimeh/tmux-themepack-previews/1.0.0/powerline/default/blue-preview.png" alt="tmux-themepack blue"></div>
+      <div class="card-desc">
+        <span class="pattern-tag">powerline · 9 colors × 3 layouts</span><br>
+        Themepack of nine single-color powerline variants (blue, cyan, gray, green, magenta, orange, purple, red, yellow) in three layouts (default, block, double). The "swap a color via @plugin" experience.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <h3>tmux-nova</h3>
+        <span class="by">by <a href="https://github.com/o0th/tmux-nova" target="_blank">o0th</a></span>
+      </div>
+      <div class="card-image-wrap"><img src="https://raw.githubusercontent.com/o0th/tmux-nova/master/.github/assets/tmux-nova.png" alt="tmux-nova"></div>
+      <div class="card-desc">
+        <span class="pattern-tag">segments framework · rectangular</span><br>
+        Modern "segments framework" rather than a fixed theme — clean rectangular blocks with configurable left/right segments. Ships a Nord-style default that's popular in dotfile videos. Closest cousin to your <b>Bauhaus plates</b>.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <h3>tmux-gruvbox</h3>
+        <span class="by">by <a href="https://github.com/egel/tmux-gruvbox" target="_blank">egel</a></span>
+      </div>
+      <div class="card-image-wrap"><img src="https://i.imgur.com/Ukyf4Iu.png" alt="tmux-gruvbox"></div>
+      <div class="card-desc">
+        <span class="pattern-tag">retro · warm palette</span><br>
+        Warm retro Gruvbox palette (mustard/orange on dark brown). Simple flat segments, no powerline. A staple in Neovim+Gruvbox dev setups. Spiritual cousin of your <b>Bauhaus</b> warmth.
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ========================== -->
+  <!-- YOUR APPROVED DESIGNS BELOW -->
+  <!-- ========================== -->
+  <div class="your-designs">
+    <h2>Your approved designs — for direct comparison</h2>
+    <p class="lead">Note how the famous bars cluster around <b>one structural pattern (powerline cascade)</b>. Your set deliberately covers <b>three</b>: cascade · floating beads · plates. That's why they feel distinct from each other and from anything in the popular pack.</p>
+
+    <div class="your-bar-row">
+      <div class="label"><b>tmux2k · Glacier</b> — cascading powerline (your equivalent to tmux2k/dracula/themepack)</div>
+      <div class="bar" style="background:#11111b;">
+        <span class="pfx-slot" style="color:var(--surface2);">●</span>
+        <span class="seg" style="background:var(--lavender);color:var(--crust);font-weight:700;">▸ seah-claude</span>
+        <span class="cap" style="--from:var(--lavender);--to:var(--sapphire);"></span>
+        <span class="seg" style="background:var(--sapphire);color:var(--crust);">▤ ~/code/tmux</span>
+        <span class="cap" style="--from:var(--sapphire);--to:var(--green);"></span>
+        <span class="seg" style="background:var(--green);color:var(--crust);">⎇ main ↑2 ●3</span>
+        <span class="cap" style="--from:var(--green);--to:#11111b;"></span>
+        <span class="seg" style="color:var(--lavender);font-weight:700;">● 1 zsh</span>
+        <span class="seg" style="color:var(--surface2);">○ 2 nvim</span>
+        <span class="seg" style="color:var(--surface2);">○ 3 logs</span>
+        <span class="gap"></span>
+        <span class="frame" style="border-color:var(--surface1);">
+          <span class="seg" style="color:var(--sapphire);">⌬ 38%</span><span style="color:var(--surface2);">›</span>
+          <span class="seg" style="color:var(--teal);">▤ 4.2G</span><span style="color:var(--surface2);">›</span>
+          <span class="seg" style="color:var(--sky);">↓ 85K</span><span style="color:var(--surface2);">›</span>
+          <span class="seg" style="color:var(--green);">▮ 82%</span>
+        </span>
+        <span class="cap" style="--from:#11111b;--to:var(--lavender);"></span>
+        <span class="seg" style="background:var(--lavender);color:var(--crust);font-weight:700;">⌚ 10:59</span>
+      </div>
+    </div>
+
+    <div class="your-bar-row">
+      <div class="label"><b>catppuccin · Atelier</b> — floating pastel pills (no equivalent in famous pack — closest is tokyo-night-tmux)</div>
+      <div class="bar" style="background:#1e1e2e;">
+        <span class="pfx-slot" style="color:var(--surface2);">●</span>
+        <span class="pp" style="background:var(--mauve);">⌂ seah-claude</span>
+        <span class="pp" style="background:var(--lavender);">▸ ~/code/tmux</span>
+        <span class="pp" style="background:var(--peach);">⎇ main</span>
+        <span class="pp subtle"><span style="color:var(--mauve);font-weight:800;">●</span> <span style="color:var(--mauve);font-weight:700;">1 zsh</span></span>
+        <span class="pp subtle"><span style="color:var(--surface2);">○</span> <span style="color:var(--overlay0);">2 nvim</span></span>
+        <span class="pp subtle"><span style="color:var(--surface2);">○</span> <span style="color:var(--overlay0);">3 logs</span></span>
+        <span class="gap"></span>
+        <span class="pp outline" style="border-color:var(--lavender);color:var(--lavender);">⌬ 38%</span>
+        <span class="pp outline" style="border-color:var(--teal);color:var(--teal);">▤ 4.2G</span>
+        <span class="pp outline" style="border-color:var(--yellow);color:var(--yellow);">▮ 82%</span>
+        <span class="pp" style="background:var(--pink);">⌚ 10·59</span>
+      </div>
+    </div>
+
+    <div class="your-bar-row">
+      <div class="label"><b>ohmytmux · Bauhaus</b> — brutalist plates (closest in pack: tmux-nova rectangular blocks)</div>
+      <div class="bar" style="background:#000;">
+        <span class="pfx-slot" style="color:var(--surface2);">●</span>
+        <span class="seg" style="background:var(--rosewater);color:#000;font-weight:800;padding:0 2px;letter-spacing:-0.05em;">▌▌▌</span>
+        <span class="seg" style="background:var(--rosewater);color:#000;font-weight:800;letter-spacing:0.06em;">⌂ SEAH-CLAUDE</span>
+        <span class="seg" style="background:var(--rosewater);color:#000;font-weight:800;padding:0 2px;letter-spacing:-0.05em;">▐▐▐</span>
+        <span class="seg" style="color:var(--peach);font-weight:800;">&nbsp;&nbsp;▶ 1 ZSH</span>
+        <span class="seg" style="color:var(--surface2);">▎</span>
+        <span class="seg" style="color:var(--overlay0);">2 NVIM</span>
+        <span class="seg" style="color:var(--surface2);">▎</span>
+        <span class="seg" style="color:var(--overlay0);">3 LOGS</span>
+        <span class="gap"></span>
+        <span class="plate"><span style="color:var(--red);">⎇</span> MAIN</span>
+        <span class="plate"><span style="color:var(--peach);">▮</span> 82%</span>
+        <span class="plate"><span style="color:var(--text);">⌚</span> 10:59</span>
+        <span class="plate" style="color:var(--rosewater);">WED·08·MAY</span>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
