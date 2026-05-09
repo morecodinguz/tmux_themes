@@ -72,12 +72,33 @@ Switching the tmux bar isn't the whole story — the **shell** can change colors
 
 Add the integration block from `install.sh` to your `~/.zshrc`. Then every `tmux-switch` swap re-sources `~/.shell-theme.zsh` and reloads p10k — your prompt, typed commands, and `ls` output all change live in the current shell.
 
+## Themed Claude Code statusline (optional)
+
+If you use [Claude Code](https://claude.com/claude-code) the repo includes `claude-statusline.sh`, a small script that renders this beneath your Claude session:
+
+```
+ ~/tmux_themes  ·   main  ·   Opus 4.7  ·  ▰▰▰▰▱▱▱▱▱▱ 43%
+```
+
+Colors come from your active tmux theme via `~/.tmux-theme`, so the Claude statusline retunes itself whenever you `tmux-switch`. To enable, point Claude Code's `statusLine.command` setting at the script:
+
+```jsonc
+// ~/.claude/settings.json
+{
+  "statusLine": {
+    "type": "command",
+    "command": "bash ~/tmux_themes/claude-statusline.sh"
+  }
+}
+```
+
 ## Layout
 
 ```
 tmux_themes/
 ├── tmux-switch.sh         # the switcher
 ├── install.sh             # one-shot bootstrap
+├── claude-statusline.sh   # Claude Code statusline (themed)
 ├── themes/
 │   ├── _common.tmux       # shared options + key bindings
 │   ├── _meta.tsv          # theme name → description (drives picker)

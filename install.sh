@@ -124,3 +124,12 @@ echo
 echo "  Per-theme prompt + syntax-highlighting + ls colors will switch live"
 echo "  with each tmux-switch invocation. Other open shells need to source"
 echo "  ~/.zshrc again or open a new shell to pick up the new colors."
+echo
+echo "  4. (Optional) Themed Claude Code statusline:"
+echo "     Edit ~/.claude/settings.json and set:"
+echo "       \"statusLine\": {"
+echo "         \"type\": \"command\","
+echo "         \"command\": \"bash $REPO_DIR/claude-statusline.sh\""
+echo "       }"
+echo "     The statusline will show a colored dir / branch / model / context bar"
+echo "     that re-themes itself based on your active tmux theme."
