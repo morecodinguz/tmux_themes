@@ -73,3 +73,7 @@ bind r source-file ~/.tmux.conf \; display-message "Reloaded ~/.tmux.conf"
 # modern theme). Per-theme confs may still override these if they need.
 set -g status-left-length 250
 set -g status-right-length 250
+
+# Generous scrollback per pane — 50,000 lines means you can scroll up through
+# a lot of shell history without it falling off.
+set -g history-limit 50000
