@@ -23,7 +23,16 @@ done
 hx() { printf '%s/%s/%s' "$(printf '%s' "$1"|cut -c1-2)" "$(printf '%s' "$1"|cut -c3-4)" "$(printf '%s' "$1"|cut -c5-6)"; }
 out="${out}${E}]10;rgb:$(hx "$FG")${BEL}"
 out="${out}${E}]11;rgb:$(hx "$BG")${BEL}"
-out="${out}${E}]12;rgb:$(hx "${SIGNAL_CURSOR_COLOR:-$CURSOR}")${BEL}"
+# The cursor is chosen separately with `cursor <name>`; honour that choice so
+# switching palettes never overrides it. Falls back to the palette's own.
+CSTATE="$HOME/.config/signal-cursor"
+if [ -r "$CSTATE" ]; then
+    SHAPE=$(cut -d' ' -f2 < "$CSTATE")
+    CURSOR_RGB=$(cut -d' ' -f3 < "$CSTATE")
+else
+    CURSOR_RGB=$(hx "$CURSOR")
+fi
+out="${out}${E}]12;rgb:${SIGNAL_CURSOR_COLOR:-$CURSOR_RGB}${BEL}"
 out="${out}${E}[${SIGNAL_CURSOR:-$SHAPE} q"
 
 if [ -n "$TMUX" ]; then printf '%sPtmux;%s%s\\' "$ESC" "$out" "$ESC"
