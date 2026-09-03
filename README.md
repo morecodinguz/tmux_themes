@@ -140,3 +140,15 @@ rm -rf ~/tmux_themes                    # remove the repo
 ```
 
 The plugin clones in `~/.tmux/plugins/` are safe to keep or delete as you wish.
+
+---
+
+## Terminal colours
+
+`iterm/signal.itermcolors` is a dark iTerm2 preset matching the `signal` theme.
+Import it with **iTerm2 → Settings → Profiles → Colors → Color Presets… →
+Import…**, then pick `signal` from the same dropdown.
+
+It matters more than it sounds: tmux paints panes black, so a profile still
+carrying a light-background palette leaves bold text, the cursor and ANSI blue
+almost unreadable inside tmux.
