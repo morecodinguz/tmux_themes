@@ -3,8 +3,14 @@
 # Sourced first by every theme's .tmux.conf.
 
 # Terminal
-set -g default-terminal "screen-256color"
+set -g default-terminal "tmux-256color"
 set -ga terminal-overrides ",xterm-256color:Tc"
+set -ga terminal-overrides ",tmux-256color:RGB"
+# Synchronized output (DECSET 2026): iTerm2 3.5+ supports atomic frame updates.
+# Without this, tmux strips the inner app's sync sequences and TUI frames tear
+# (chars from two frames interleave). Declare it for the OUTER terminal (iTerm2
+# sets TERM=xterm-256color). Requires a client reattach (or kill-server) to apply.
+set -as terminal-features ",xterm-256color:sync"
 
 # Prefix: C-a (instead of C-b)
 set -g prefix C-a
@@ -62,7 +68,7 @@ setw -g pane-base-index 1
 set -g renumber-windows on
 
 # Faster repeat
-set -sg escape-time 10
+set -sg escape-time 0
 set -g repeat-time 600
 
 # Reload bound to r

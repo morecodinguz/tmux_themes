@@ -15,7 +15,10 @@ fi
 
 # %t = temperature only, e.g. "+20°C". Strip the leading +.
 out=$(curl -s --max-time 3 'https://wttr.in/?format=%t' 2>/dev/null | tr -d '+\n')
-if [[ -n "$out" && "$out" != *"Unknown"* ]]; then
+# Only accept responses that actually look like a temperature (e.g. "20°C").
+# This rejects wttr.in error bodies like "location not found: sqlite read
+# failed: ..." which would otherwise poison the cache and display forever.
+if [[ "$out" == *"°"* && "$out" =~ [0-9] ]]; then
     echo -n "$out" > "$CACHE"
     echo "$out"
 else
