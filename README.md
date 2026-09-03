@@ -1,6 +1,6 @@
 # tmux_themes
 
-A switcher for **11 tmux themes**: 3 hand-designed (Glacier · Atelier · Bauhaus) plus 8 of the most popular open-source themes (Catppuccin, Dracula, Rose Pine, Tokyo Night, tmux-power, tmux-powerline, Gruvbox, Nova).
+A switcher for **12 tmux themes**: 4 hand-designed (Signal · Glacier · Atelier · Bauhaus) plus 8 of the most popular open-source themes (Catppuccin, Dracula, Rose Pine, Tokyo Night, tmux-power, tmux-powerline, Gruvbox, Nova).
 
 ```
 tmux-switch              # cycle next theme
@@ -11,10 +11,11 @@ tmux-switch <name>       # jump straight to a theme
 
 ---
 
-## The 11 themes
+## The 12 themes
 
 | name | identity | source |
 | --- | --- | --- |
+| `signal` | quiet minimal · three colours, and colour only where something needs attention | hand-designed |
 | `glacier` | cool cascading powerline · lavender → sapphire → green | redesigned tmux2k |
 | `atelier` | pastel floating pills · 6 pastel colors with rounded ends | redesigned catppuccin |
 | `bauhaus` | warm brutalist plates · heavy session frame + outlined data plates | redesigned ohmytmux |
@@ -33,31 +34,34 @@ Glacier · Atelier · Bauhaus each pick a different **structural pattern**: casc
 
 ## Install
 
-Requirements: tmux, git, a Nerd Font in your terminal (e.g. JetBrainsMono Nerd Font Mono). `fzf` is optional but recommended.
+On a brand-new machine, one command:
 
 ```sh
-git clone https://github.com/morecodinguz/tmux_themes ~/tmux_themes
-bash ~/tmux_themes/install.sh
+curl -fsSL https://raw.githubusercontent.com/morecodinguz/tmux_themes/main/install.sh | bash
 ```
+
+That clones the repo to `~/tmux_themes`, installs anything missing, links everything up, and leaves you on the `signal` theme. It is safe to re-run.
+
+Options:
+
+```sh
+... | bash -s -- --minimal        # skip the 13 upstream plugin repos
+... | bash -s -- --theme glacier  # start on a different theme
+... | bash -s -- --no-shell       # do not touch ~/.zshrc
+```
+
+`--minimal` is enough for the four hand-written themes (`signal`, `glacier`, `atelier`, `bauhaus`) and `powerline-classic`; the eight famous themes need their upstream plugins.
 
 The installer:
 
-1. Verifies tmux/fzf are installed (offers `brew install fzf` if missing)
-2. Clones the 9 plugin repos used by the famous themes into `~/.tmux/plugins/`
-3. Symlinks `~/.tmux-switch.sh` → `~/tmux_themes/tmux-switch.sh`
-4. Sets the default theme to `atelier`
+1. Clones the repo to `~/tmux_themes` (or updates it if already there). The theme files reference that exact path, so if you cloned elsewhere it symlinks `~/tmux_themes` to your clone.
+2. Installs `tmux` if missing, plus `fzf` and `zoxide`, via Homebrew. Stops with instructions if Homebrew is not installed.
+3. Clones the 13 upstream plugin repos into `~/.tmux/plugins/` unless `--minimal`.
+4. Backs up an existing real `~/.tmux.conf` before replacing it with a symlink.
+5. Adds a hook to `~/.zshrc` between `# >>> tmux_themes >>>` markers — re-running replaces the block instead of stacking copies.
+6. Verifies the symlinks resolve and the tmux config actually parses, on a throwaway socket so a running tmux server is never touched.
 
-Add to your shell rc (`~/.zshrc` or `~/.bashrc`):
-
-```sh
-alias tmux-switch='~/.tmux-switch.sh'
-```
-
-Then in any shell:
-
-```sh
-tmux-switch list      # opens fzf picker
-```
+Requirements: `git`, and a Nerd Font in your terminal (e.g. JetBrainsMono Nerd Font Mono) for the famous themes' glyphs. `signal` uses no glyphs and works in any font.
 
 ---
 

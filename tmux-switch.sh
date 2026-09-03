@@ -12,7 +12,8 @@
 
 set -euo pipefail
 
-THEMES_DIR="$HOME/tmux_themes/themes"
+REPO_DIR="$(cd "$(dirname "$(readlink "${BASH_SOURCE[0]}" || echo "${BASH_SOURCE[0]}")")" && pwd)"
+THEMES_DIR="$REPO_DIR/themes"
 META_FILE="$THEMES_DIR/_meta.tsv"
 THEME_FILE="$HOME/.tmux-theme"
 TMUX_CONF="$HOME/.tmux.conf"
@@ -79,7 +80,7 @@ apply_theme() {
     echo "$theme" > "$THEME_FILE"
 
     # Shell-theme symlink (Powerlevel10k + zsh-syntax-highlighting + LS_COLORS)
-    local shell_conf="$HOME/tmux_themes/shell/$theme.zsh"
+    local shell_conf="$REPO_DIR/shell/$theme.zsh"
     if [[ -f "$shell_conf" ]]; then
         ln -sfn "$shell_conf" "$HOME/.shell-theme.zsh"
     fi
