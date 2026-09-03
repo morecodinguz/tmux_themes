@@ -1,0 +1,30 @@
+#!/bin/sh
+# Emit one palette as escape sequences on stdout. Usage: palette.sh <name>
+#
+# tmux note: inside tmux every ESC must be DOUBLED and the payload wrapped in a
+# DCS passthrough. Do not use sed for that -- BSD sed ignores \o033 silently.
+SELF="$0"
+while [ -L "$SELF" ]; do SELF="$(readlink "$SELF")"; done
+DIR="$(cd "$(dirname "$SELF")" && pwd)"
+NAME="${1:-signal}"
+CONF="$DIR/palettes/$NAME.conf"
+[ -r "$CONF" ] || { echo "no such palette: $NAME" >&2; exit 1; }
+# shellcheck disable=SC1090
+. "$CONF"
+
+ESC=$(printf '\033'); BEL=$(printf '\007')
+[ -n "$TMUX" ] && E="$ESC$ESC" || E="$ESC"
+
+out=""; i=0
+for c in $ANSI; do
+    out="${out}${E}]4;${i};rgb:$(printf '%s' "$c" | cut -c1-2)/$(printf '%s' "$c" | cut -c3-4)/$(printf '%s' "$c" | cut -c5-6)${BEL}"
+    i=$((i+1))
+done
+hx() { printf '%s/%s/%s' "$(printf '%s' "$1"|cut -c1-2)" "$(printf '%s' "$1"|cut -c3-4)" "$(printf '%s' "$1"|cut -c5-6)"; }
+out="${out}${E}]10;rgb:$(hx "$FG")${BEL}"
+out="${out}${E}]11;rgb:$(hx "$BG")${BEL}"
+out="${out}${E}]12;rgb:$(hx "${SIGNAL_CURSOR_COLOR:-$CURSOR}")${BEL}"
+out="${out}${E}[${SIGNAL_CURSOR:-$SHAPE} q"
+
+if [ -n "$TMUX" ]; then printf '%sPtmux;%s%s\\' "$ESC" "$out" "$ESC"
+else printf '%s' "$out"; fi
