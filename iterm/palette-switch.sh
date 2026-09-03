@@ -16,6 +16,10 @@ apply() {
     n="$1"
     [ -r "$DIR/palettes/$n.conf" ] || { echo "no such palette: $n" >&2; return 1; }
     printf '%s' "$n" > "$STATE"
+    # shellcheck disable=SC1090
+    . "$DIR/palettes/$n.conf"
+
+    # 1. terminal: the 16 ANSI colours, ground, foreground and cursor
     if [ -n "$TMUX" ]; then
         for t in $(tmux list-clients -F '#{client_tty}' 2>/dev/null); do
             sh "$DIR/palette.sh" "$n" > "$t" 2>/dev/null
@@ -23,7 +27,55 @@ apply() {
     else
         sh "$DIR/palette.sh" "$n"
     fi
-    echo "palette: $n"
+
+    # 2. Claude Code: rewrite the theme file it already has selected, so the
+    #    chat re-colours without changing which theme is chosen. The theme
+    #    directory is watched, so this applies without restarting.
+    T="$HOME/.claude/themes/signal.json"
+    if [ -d "$(dirname "$T")" ]; then
+        cat > "$T" <<JSON
+{
+  "name": "Signal",
+  "base": "dark",
+  "overrides": {
+    "userMessageBackground": "#$CC_USER",
+    "userMessageBackgroundHover": "#$CC_USER",
+    "bashMessageBackgroundColor": "#$CC_BASH",
+    "memoryBackgroundColor": "#$CC_MEM",
+    "bashBorder": "#$CC_ACCENT",
+    "claude": "#$CC_CLAUDE",
+    "claudeShimmer": "#$CC_CLAUDE",
+    "permission": "#$CC_ACCENT",
+    "suggestion": "#$CC_ACCENT",
+    "remember": "#$CC_ACCENT",
+    "planMode": "#$CC_ACCENT",
+    "autoAccept": "#$CC_ACCENT",
+    "skill": "#$CC_ACCENT",
+    "success": "#$CC_OK",
+    "error": "#$CC_ERR",
+    "warning": "#$CC_WARN",
+    "subtle": "#$CC_SUBTLE",
+    "inactive": "#$CC_SUBTLE"
+  }
+}
+JSON
+    fi
+
+    # 3. tmux: pane grounds, borders and the status bar
+    if [ -n "$TMUX" ]; then
+        tmux set -g window-style        "bg=#$TM_INACTIVE" \; \
+             set -g window-active-style "bg=#$TM_BG" \; \
+             set -g pane-border-style        "fg=#$TM_BORDER" \; \
+             set -g pane-active-border-style "fg=#$TM_ACCENT" \; \
+             set -g status-style "bg=#$TM_BG,fg=#$TM_DIM" \; \
+             set -g message-style "bg=#$TM_ACCENT,fg=#$TM_BG" \; \
+             set -g status-left "#{?client_prefix,#[fg=#$TM_WARN]●,#[fg=#$TM_BORDER]●} #[fg=#$TM_BG,bg=#$TM_ACCENT,bold] #S #[fg=#$TM_ACCENT,bg=#$TM_BG] " \; \
+             setw -g window-status-format         "#[fg=#$TM_DIM] #I #W#{?window_zoomed_flag,#[fg=#$TM_WARN]Z,}#{?window_activity_flag,#[fg=#$TM_WARN]!,} " \; \
+             setw -g window-status-current-format "#[fg=#$TM_ACCENT,bold] #I #W#{?window_zoomed_flag,#[fg=#$TM_WARN]Z,} " \; \
+             refresh-client -S 2>/dev/null
+    fi
+
+    echo "palette: $n   (terminal + Claude Code + tmux)"
 }
 
 case "${1-}" in
