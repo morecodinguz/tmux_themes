@@ -2,32 +2,27 @@
   "name": "Signal",
   "base": "dark",
   "overrides": {
-    "userMessageBackground": "#1d2633",
-    "userMessageBackgroundHover": "#25303f",
-    "bashMessageBackgroundColor": "#2a2233",
-    "memoryBackgroundColor": "#16292d",
+    "userMessageBackground": "#1a2b40",
+    "userMessageBackgroundHover": "#22374f",
+    "bashMessageBackgroundColor": "#2a2038",
+    "memoryBackgroundColor": "#123130",
     "bashBorder": "#b98cff",
-    "promptBorder": "#3a4450",
-
+    "promptBorder": "#2f3a47",
     "claude": "#d77757",
     "claudeShimmer": "#f59575",
-
     "permission": "#5fafff",
     "suggestion": "#5fafff",
     "remember": "#8ac6ff",
     "planMode": "#4fc9c9",
     "autoAccept": "#b98cff",
     "skill": "#b98cff",
-
     "success": "#6fcf7f",
     "error": "#e05252",
     "warning": "#e5a13a",
-
     "diffAdded": "#2e4a33",
     "diffRemoved": "#4d2b30",
     "diffAddedWord": "#8ee79a",
     "diffRemovedWord": "#ff8a80",
-
     "subtle": "#8a94a0",
     "inactive": "#6b7280"
   }

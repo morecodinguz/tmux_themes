@@ -32,11 +32,11 @@ Usage:
 import json, os, sys
 
 PALETTE = {
-    "Background Color": "#0b0d10",
+    "Background Color": "#0f1319",
     "Foreground Color": "#c6c6c6",
     "Bold Color":       "#ffffff",
     "Cursor Color":     "#5fafff",
-    "Cursor Text Color":"#0b0d10",
+    "Cursor Text Color":"#0f1319",
     "Selection Color":  "#1e3a5f",
     "Selected Text Color":"#ffffff",
     "Link Color":       "#5fafff",
