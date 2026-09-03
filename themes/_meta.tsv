@@ -9,3 +9,4 @@ tmux-power	bold heavy powerline · wfxr/tmux-power gold variant
 powerline-classic	original heavy powerline · erikw/tmux-powerline
 gruvbox	warm retro flat segments · egel/tmux-gruvbox
 nova	clean rectangular blocks · o0th/tmux-nova nord-style
+signal	quiet minimal · colour only for zoom, activity, dirty repo, low battery
