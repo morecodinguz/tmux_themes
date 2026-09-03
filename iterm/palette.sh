@@ -35,5 +35,12 @@ fi
 out="${out}${E}]12;rgb:${SIGNAL_CURSOR_COLOR:-$CURSOR_RGB}${BEL}"
 out="${out}${E}[${SIGNAL_CURSOR:-$SHAPE} q"
 
+# Selection. OSC 17/19 is the xterm way; iTerm2 also accepts its own
+# SetColors, and honours whichever it understands. Both are harmless elsewhere.
+out="${out}${E}]17;rgb:$(hx "$SEL_BG")${BEL}"
+out="${out}${E}]19;rgb:$(hx "$SEL_FG")${BEL}"
+out="${out}${E}]1337;SetColors=selbg=${SEL_BG}${BEL}"
+out="${out}${E}]1337;SetColors=selfg=${SEL_FG}${BEL}"
+
 if [ -n "$TMUX" ]; then printf '%sPtmux;%s%s\\' "$ESC" "$out" "$ESC"
 else printf '%s' "$out"; fi

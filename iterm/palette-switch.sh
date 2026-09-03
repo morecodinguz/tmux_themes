@@ -54,6 +54,7 @@ apply() {
     "success": "#$CC_OK",
     "error": "#$CC_ERR",
     "warning": "#$CC_WARN",
+    "selectionBg": "#$SEL_BG",
     "subtle": "#$CC_SUBTLE",
     "inactive": "#$CC_SUBTLE"
   }
@@ -61,18 +62,24 @@ apply() {
 JSON
     fi
 
-    # 3. tmux: pane grounds, borders and the status bar
+    # 3. tmux: pane grounds, borders, selection and the status bar.
+    # One call per option on purpose -- a single chained `tmux a \; b \; c`
+    # breaks silently the moment a line-continuation backslash goes missing,
+    # and the leftovers then run as the shell's own `set` builtin.
     if [ -n "$TMUX" ]; then
-        tmux set -g window-style        "bg=#$TM_INACTIVE" \; \
-             set -g window-active-style "bg=#$TM_BG" \; \
-             set -g pane-border-style        "fg=#$TM_BORDER" \; \
-             set -g pane-active-border-style "fg=#$TM_ACCENT" \; \
-             set -g status-style "bg=#$TM_BG,fg=#$TM_DIM" \; \
-             set -g message-style "bg=#$TM_ACCENT,fg=#$TM_BG" \; \
-             set -g status-left "#{?client_prefix,#[fg=#$TM_WARN]●,#[fg=#$TM_BORDER]●} #[fg=#$TM_BG,bg=#$TM_ACCENT,bold] #S #[fg=#$TM_ACCENT,bg=#$TM_BG] " \; \
-             setw -g window-status-format         "#[fg=#$TM_DIM] #I #W#{?window_zoomed_flag,#[fg=#$TM_WARN]Z,}#{?window_activity_flag,#[fg=#$TM_WARN]!,} " \; \
-             setw -g window-status-current-format "#[fg=#$TM_ACCENT,bold] #I #W#{?window_zoomed_flag,#[fg=#$TM_WARN]Z,} " \; \
-             refresh-client -S 2>/dev/null
+        tmux set -g window-style                  "bg=#$TM_INACTIVE"
+        tmux set -g window-active-style           "bg=#$TM_BG"
+        tmux set -g pane-border-style             "fg=#$TM_BORDER"
+        tmux set -g pane-active-border-style      "fg=#$TM_ACCENT"
+        tmux set -g status-style                  "bg=#$TM_BG,fg=#$TM_DIM"
+        tmux set -g message-style                 "bg=#$TM_ACCENT,fg=#$TM_BG"
+        tmux set -g mode-style                    "bg=#$SEL_BG,fg=#$SEL_FG"
+        tmux set -g copy-mode-match-style         "bg=#$SEL_MATCH,fg=#$TM_BG"
+        tmux set -g copy-mode-current-match-style "bg=#$TM_ACCENT,fg=#$TM_BG"
+        tmux set -g status-left "#{?client_prefix,#[fg=#$TM_WARN]●,#[fg=#$TM_BORDER]●} #[fg=#$TM_BG,bg=#$TM_ACCENT,bold] #S #[fg=#$TM_ACCENT,bg=#$TM_BG] "
+        tmux setw -g window-status-format         "#[fg=#$TM_DIM] #I #W#{?window_zoomed_flag,#[fg=#$TM_WARN]Z,}#{?window_activity_flag,#[fg=#$TM_WARN]!,} "
+        tmux setw -g window-status-current-format "#[fg=#$TM_ACCENT,bold] #I #W#{?window_zoomed_flag,#[fg=#$TM_WARN]Z,} "
+        tmux refresh-client -S 2>/dev/null
     fi
 
     echo "palette: $n   (terminal + Claude Code + tmux)"
