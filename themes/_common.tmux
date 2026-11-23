@@ -74,6 +74,10 @@ set -g repeat-time 600
 # Reload bound to r
 bind r source-file ~/.tmux.conf \; display-message "Reloaded ~/.tmux.conf"
 
+# K: stop the program frozen in this pane and reset its terminal. tmux still
+# reads keys when the program in the pane no longer does.
+bind K run-shell -b "~/.local/bin/unfreeze-pane '#{pane_tty}'"
+
 # Status-bar length budgets — generous defaults so themes don't get aggressively
 # truncated on narrow panes (default tmux is 10/20 chars, way too small for any
 # modern theme). Per-theme confs may still override these if they need.
